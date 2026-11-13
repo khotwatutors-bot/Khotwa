@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0a1029"><title>Khutwa Content Editor</title>
+<style>
+:root{--bg:#0a1029;--panel:#111b3d;--line:rgba(190,200,255,.16);--ink:#f5f6ff;--muted:#aeb9d9;--blue:#5577ff;--purple:#a66aff;--mint:#9ff1df}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:1.7}.wrap{width:min(1100px,calc(100% - 28px));margin:auto}.header{padding:24px 0 18px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,#101b46,#201547)}.header h1{font-size:25px;margin:0}.header p{font-size:11px;color:#c4cdeb;margin:7px 0 0}.panel{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:17px;padding:18px;margin:18px 0}.button{border:0;border-radius:11px;padding:11px 15px;background:linear-gradient(120deg,var(--blue),var(--purple));color:white;font-weight:900;font-family:inherit;font-size:11px;cursor:pointer}.button.secondary{background:rgba(255,255,255,.06);border:1px solid var(--line)}.button:disabled{opacity:.4;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.status{color:var(--mint);font-size:10px;min-height:19px}.muted{color:var(--muted);font-size:10px}.tabs{display:flex;gap:7px;overflow:auto;margin:14px 0}.tab{padding:9px 12px;border:1px solid var(--line);background:rgba(255,255,255,.035);color:#dce4ff;border-radius:10px;white-space:nowrap;font-size:10px;font-weight:900}.tab.active{background:rgba(94,105,255,.22);border-color:rgba(166,150,255,.4)}.editor-section{display:none}.editor-section.active{display:block}.field{display:grid;gap:5px;margin:10px 0}.field label{font-size:10px;color:#dfe5ff;font-weight:900}.field input,.field textarea,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#080f28;color:#fff;font-family:inherit;font-size:11px}.field textarea{min-height:74px;resize:vertical}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.item{border:1px solid var(--line);border-radius:13px;padding:13px;margin:10px 0;background:rgba(0,0,0,.12)}.item h3{font-size:12px;margin:0 0 6px}.item-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{font-size:9px;color:#c4baff}.hidden{display:none!important}.file-input{font-size:11px;color:#dce4ff;max-width:100%}.warning{border-right:3px solid #d9b568;padding:10px 12px;background:rgba(217,181,104,.07);font-size:10px;color:#e9dbbc;border-radius:8px}.footer{color:#8190b9;font-size:9px;padding:20px 0 40px}@media(max-width:650px){.grid{grid-template-columns:1fr}.header h1{font-size:21px}}
+</style>
+</head>
+<body>
+<header class="header"><div class="wrap"><h1>خُطوة | محرر المحتوى والأسعار</h1><p>أداة محلية بسيطة لتعديل محتوى الموقع دون تعديل HTML أو كتابة كود. لا تتصل بحساباتك ولا ترفع بيانات إلى الإنترنت.</p></div></header>
+<main class="wrap">
+  <section class="panel">
+    <h2 style="font-size:15px;margin:0 0 8px">1. افتح ملف المحتوى الحالي</h2>
+    <p class="muted">من مجلد الموقع اختر: <b>site/assets/content.js</b>. بعد تحميله ستظهر لك حقول تعديل الخدمات والأسعار والموضوعات والباقات وروابط النماذج.</p>
+    <div class="row"><input id="fileInput" class="file-input" type="file" accept=".js,.txt,application/javascript,text/plain"><button class="button secondary" id="loadDraft" type="button">تحميل آخر مسودة محفوظة</button><button class="button secondary" id="saveDraft" type="button" disabled>حفظ مسودة على هذا الجهاز</button></div>
+    <p class="status" id="loadStatus" role="status"></p>
+  </section>
+  <div id="editor" class="hidden">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="services">الخدمات والأسعار</button>
+      <button class="tab" data-tab="topics">مكتبة الموضوعات</button>
+      <button class="tab" data-tab="packages">الباقات</button>
+      <button class="tab" data-tab="integrations">Google والتواصل</button>
+      <button class="tab" data-tab="brand">الرئيسية والرؤية</button>
+    </div>
+    <section class="editor-section active" id="tab-services">
+      <div class="panel"><h2 style="font-size:15px;margin:0">تسعير مكتبة الموضوعات</h2><div class="field"><label>سعر الموضوع الواحد بالدولار</label><input id="topicPrice" type="number" min="0" step="0.5"></div><p class="muted">السعر الأساسي المقترح للإطلاق: 3 دولارات للموضوع. لا تُخزن نسب الخصومات الداخلية أو أسعار التفاوض في ملف JavaScript العام للموقع؛ تحفظ في ملف سياسة التسعير الداخلي.</p></div>
+      <div id="serviceEditor"></div>
+    </section>
+    <section class="editor-section" id="tab-topics"><div class="panel"><h2 style="font-size:15px;margin:0">موضوعات المكتبة</h2><p class="muted">عدّل اسم الموضوع ونتيجته التعليمية باللغتين. لا تكتب أن الموضوع مسجل أو جاهز؛ حالة التجهيز تُدار داخليًا ولا تظهر للعميل.</p><div id="topicEditor"></div></div></section>
+    <section class="editor-section" id="tab-packages"><div class="panel"><h2 style="font-size:15px;margin:0">الباقات والتجميعات المقترحة</h2><p class="muted">عدّل الأسماء والوصف ومكونات الباقة باستخدام معرّفات الخدمات والموضوعات. الخصومات الخاصة لا تُعرض كنسب على الموقع.</p><div id="packageEditor"></div></div></section>
+    <section class="editor-section" id="tab-integrations">
+      <div class="panel"><h2 style="font-size:15px;margin:0">بيانات التواصل</h2><div class="grid"><div class="field"><label>البريد الرسمي</label><input id="contactEmail"></div><div class="field"><label>رقم واتساب مع كود الدولة دون +</label><input id="contactWhatsApp"></div><div class="field"><label>رابط LinkedIn</label><input id="contactLinkedIn"></div><div class="field"><label>رابط كتالوج WhatsApp المباشر (اختياري)</label><input id="catalogUrl"></div><div class="field"><label>معرّف Google Analytics 4 (اختياري ويبدأ G-)</label><input id="gaId"></div></div></div>
+      <div class="panel"><h2 style="font-size:15px;margin:0">روابط Google Forms</h2><p class="muted">أنشئ النماذج من حساب خُطوة، ثم ألصق روابطها هنا. لا تدخل كلمة مرور أو مفتاحًا سريًا.</p><div id="formUrlEditor"></div></div>
+      <div class="panel"><h2 style="font-size:15px;margin:0">معرّفات حقول النماذج (entry IDs)</h2><p class="muted">لكل نموذج خريطة مستقلة. استخدم رابط الحصول على إجابة معبأة مسبقًا من Google Forms، واستخرج رقم كل حقل من رابط entry.123.</p><div id="entryEditor"></div></div>
+    </section>
+    <section class="editor-section" id="tab-brand">
+      <div class="panel"><h2 style="font-size:15px;margin:0">النصوص الرئيسية</h2><div class="field"><label>العنوان الرئيسي — عربي</label><input id="heroTitleAr"></div><div class="field"><label>العنوان الرئيسي — English</label><input id="heroTitleEn"></div><div class="field"><label>الوصف الرئيسي — عربي</label><textarea id="heroSubtitleAr"></textarea></div><div class="field"><label>الوصف الرئيسي — English</label><textarea id="heroSubtitleEn"></textarea></div></div>
+      <div class="panel"><h2 style="font-size:15px;margin:0">رؤية خُطوة</h2><div class="field"><label>عنوان الرؤية — عربي</label><input id="visionTitleAr"></div><div class="field"><label>عنوان الرؤية — English</label><input id="visionTitleEn"></div><div class="field"><label>نص الرؤية — عربي</label><textarea id="visionBodyAr"></textarea></div><div class="field"><label>نص الرؤية — English</label><textarea id="visionBodyEn"></textarea></div></div>
+    </section>
+    <section class="panel">
+      <div class="row"><button class="button" id="exportBtn" type="button">تصدير ملف content.js المحدث</button><button class="button secondary" id="downloadJson" type="button">تنزيل نسخة JSON للنسخ الاحتياطي</button><button class="button secondary" id="resetBtn" type="button">إعادة تحميل الملف الأصلي</button></div>
+      <p class="status" id="exportStatus" role="status"></p>
+      <p class="warning">بعد التصدير: استبدل الملف <b>site/assets/content.js</b> بالملف الجديد داخل GitHub. لا ترفع ملف المحرر بدل ملف الموقع، ولا تعدّل ملفات الهوية أو الصفحة الرئيسية عند تغيير الأسعار فقط.</p>
+    </section>
+  </div>
+  <div class="footer">Khutwa Content Editor · يعمل محليًا داخل المتصفح · لا يرسل البيانات إلى أي خدمة خارجية.</div>
+</main>
+<script>
+(()=>{
+'use strict';
+let data=null,original=null;
+const $=s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
+const formKeys=['general','profileCreation','profileDevelopment','videoCreation','videoDevelopment','topicSession','marketReview','promotion','multiService','futureVision'];
+const fieldKeys=['name','whatsapp','email','country','subject','experience','currentPlatform','targetPlatform','profileLink','selectedItems','videoType','videoPlatform','videoDuration','footage','promotion','marketCountry','marketLearnerLanguage','customTopics','goal','campaignBudget','preferredChannel','consent'];
+function parseContent(text){const marker='window.KHUTWA_DATA';const at=text.indexOf('=');if(!text.includes(marker)||at<0)throw new Error('الملف ليس content.js الخاص بخُطوة.');let raw=text.slice(at+1).trim();if(raw.endsWith(';'))raw=raw.slice(0,-1);return JSON.parse(raw);}
+function setPath(path,value){const parts=path.split('.');let ref=data;for(let i=0;i<parts.length-1;i++)ref=ref[parts[i]];ref[parts.at(-1)]=value;}
+function field(label,path,value,type='text'){return `<div class="field"><label>${label}</label><input data-path="${path}" type="${type}" value="${String(value??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" /></div>`;}
+function area(label,path,value){return `<div class="field"><label>${label}</label><textarea data-path="${path}">${String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea></div>`;}
+function render(){if(!data)return;$('#editor').classList.remove('hidden');$('#saveDraft').disabled=false;
+ $('#topicPrice').value=data.pricing.topicPrice;
+ $('#serviceEditor').innerHTML=data.services.map((s,i)=>`<div class="item"><div class="item-top"><h3>${s.title.ar}</h3><span class="badge">${s.id}</span></div><div class="grid">${field('الاسم بالعربية',`services.${i}.title.ar`,s.title.ar)}${field('Name in English',`services.${i}.title.en`,s.title.en)}${field('السعر بالدولار (اتركه فارغًا لعرض سعر)',`services.${i}.price`,s.price??'','number')}${field('وصف مختصر بالعربية',`services.${i}.short.ar`,s.short.ar)}${field('Short description in English',`services.${i}.short.en`,s.short.en)}${area('التسليمات — عربي (كل بند في سطر)',`services.${i}.includes.ar`,s.includes.ar.join('\n'))}${area('Deliverables — English (one per line)',`services.${i}.includes.en`,s.includes.en.join('\n'))}${area('المدة',`services.${i}.delivery.ar`,s.delivery.ar)}${area('Payment terms',`services.${i}.payment.ar`,s.payment.ar)}${area('ملاحظات ونطاق الخدمة',`services.${i}.notes.ar`,s.notes.ar)}</div></div>`).join('');
+ const topics=data.paths.flatMap((p,pi)=>p.topics.map((topic,ti)=>({path:p,topic,pi,ti})));$('#topicEditor').innerHTML=topics.map(({path,topic,pi,ti})=>`<div class="item"><div class="item-top"><h3>${path.title.ar}</h3><span class="badge">${topic.id}</span></div><div class="grid">${field('الموضوع بالعربية',`paths.${pi}.topics.${ti}.ar`,topic.ar)}${field('Topic in English',`paths.${pi}.topics.${ti}.en`,topic.en)}${field('النتيجة التعليمية — عربي',`paths.${pi}.topics.${ti}.outcome.ar`,topic.outcome.ar)}${field('Learning outcome — English',`paths.${pi}.topics.${ti}.outcome.en`,topic.outcome.en)}</div></div>`).join('');
+ $('#packageEditor').innerHTML=data.packages.map((p,i)=>`<div class="item"><div class="item-top"><h3>${p.title.ar}</h3><span class="badge">${p.id}</span></div><div class="grid">${field('اسم الباقة — عربي',`packages.${i}.title.ar`,p.title.ar)}${field('Package name — English',`packages.${i}.title.en`,p.title.en)}${area('لمن تناسب؟ — عربي',`packages.${i}.audience.ar`,p.audience.ar)}${area('Who is it for? — English',`packages.${i}.audience.en`,p.audience.en)}${field('مكونات الباقة — IDs مفصولة بفواصل',`packages.${i}.items`,p.items.join(', '))}</div></div>`).join('');
+ $('#contactEmail').value=data.contact.email;$('#contactWhatsApp').value=data.contact.whatsapp;$('#contactLinkedIn').value=data.contact.linkedin;$('#catalogUrl').value=data.integrations.catalogUrl||'';$('#gaId').value=data.integrations.googleAnalyticsId||'';
+ $('#formUrlEditor').innerHTML=formKeys.map(k=>field(k,`integrations.googleForms.${k}`,data.integrations.googleForms[k]||'')).join('');
+ $('#entryEditor').innerHTML=formKeys.map(k=>`<div class="item"><h3>${k} — field IDs</h3>${area('خريطة الحقول بصيغة JSON',`integrations.googleForms.prefillEntries.${k}`,JSON.stringify(data.integrations.googleForms.prefillEntries?.[k]||Object.fromEntries(fieldKeys.map(f=>[f,''])),null,2))}</div>`).join('');
+ $('#heroTitleAr').value=data.hero.title.ar;$('#heroTitleEn').value=data.hero.title.en;$('#heroSubtitleAr').value=data.hero.subtitle.ar;$('#heroSubtitleEn').value=data.hero.subtitle.en;$('#visionTitleAr').value=data.vision.title.ar;$('#visionTitleEn').value=data.vision.title.en;$('#visionBodyAr').value=data.vision.body.ar;$('#visionBodyEn').value=data.vision.body.en;
+}
+function collect(){if(!data)throw new Error('حمّل ملف content.js أولًا.');
+ data.pricing.topicPrice=Number($('#topicPrice').value);
+ $$('[data-path]').forEach(el=>{const path=el.dataset.path;let value=el.value;if(path.endsWith('.price'))value=value.trim()===''?null:Number(value);else if(path.match(/^packages\.\d+\.items$/))value=value.split(',').map(x=>x.trim()).filter(Boolean);else if(path.includes('.includes.'))value=value.split('\n').map(x=>x.trim()).filter(Boolean);else if(path.includes('prefillEntries.')){try{value=JSON.parse(value)}catch{throw new Error('أحد خرائط حقول Google Forms ليس JSON صالحًا: '+path)}}setPath(path,value);});
+ data.contact.email=$('#contactEmail').value.trim();data.contact.whatsapp=$('#contactWhatsApp').value.replace(/\D/g,'');data.contact.linkedin=$('#contactLinkedIn').value.trim();data.integrations.catalogUrl=$('#catalogUrl').value.trim();data.integrations.googleAnalyticsId=$('#gaId').value.trim();
+ data.hero.title.ar=$('#heroTitleAr').value;data.hero.title.en=$('#heroTitleEn').value;data.hero.subtitle.ar=$('#heroSubtitleAr').value;data.hero.subtitle.en=$('#heroSubtitleEn').value;data.vision.title.ar=$('#visionTitleAr').value;data.vision.title.en=$('#visionTitleEn').value;data.vision.body.ar=$('#visionBodyAr').value;data.vision.body.en=$('#visionBodyEn').value;
+ return data;}
+function download(filename,text,type){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+$('#fileInput').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=parseContent(await file.text());data=JSON.parse(JSON.stringify(parsed));original=JSON.parse(JSON.stringify(parsed));render();$('#loadStatus').textContent='تم تحميل ملف خُطوة. يمكنك الآن تعديل الحقول.';}catch(err){$('#loadStatus').textContent='تعذر تحميل الملف: '+err.message;}});
+$('#saveDraft').addEventListener('click',()=>{try{collect();localStorage.setItem('khutwa_content_draft',JSON.stringify(data));$('#loadStatus').textContent='تم حفظ المسودة على هذا الجهاز فقط.';}catch(e){$('#loadStatus').textContent=e.message;}});
+$('#loadDraft').addEventListener('click',()=>{try{const raw=localStorage.getItem('khutwa_content_draft');if(!raw)throw new Error('لا توجد مسودة محفوظة على هذا الجهاز.');data=JSON.parse(raw);original=JSON.parse(JSON.stringify(data));render();$('#loadStatus').textContent='تم تحميل المسودة المحلية.';}catch(e){$('#loadStatus').textContent=e.message;}});
+$('#exportBtn').addEventListener('click',()=>{try{collect();const output='window.KHUTWA_DATA = '+JSON.stringify(data,null,2)+';\n';download('content.js',output,'text/javascript;charset=utf-8');$('#exportStatus').textContent='تم تصدير content.js. استبدل به site/assets/content.js داخل مستودع GitHub.';}catch(e){$('#exportStatus').textContent='لم يتم التصدير: '+e.message;}});
+$('#downloadJson').addEventListener('click',()=>{try{collect();download('khutwa-content-backup.json',JSON.stringify(data,null,2),'application/json;charset=utf-8');$('#exportStatus').textContent='تم تنزيل نسخة JSON احتياطية.';}catch(e){$('#exportStatus').textContent=e.message;}});
+$('#resetBtn').addEventListener('click',()=>{if(!original)return;data=JSON.parse(JSON.stringify(original));render();$('#exportStatus').textContent='تمت إعادة التحميل إلى النسخة التي فتحتها أول مرة.';});
+$$('.tab').forEach(btn=>btn.addEventListener('click',()=>{$$('.tab').forEach(x=>x.classList.toggle('active',x===btn));$$('.editor-section').forEach(x=>x.classList.toggle('active',x.id==='tab-'+btn.dataset.tab));}));
+})();
+</script>
+</body></html>

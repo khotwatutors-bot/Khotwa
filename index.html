@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d21">
+  <meta name="description" content="خُطوة — نموّك المهني. خدمات تطوير البروفايل والفيديو، مكتبة موضوعات للمدرسين، وإرشاد لاختيار الخطوة المناسبة.">
+  <meta property="og:title" content="خُطوة | نموّك المهني">
+  <meta property="og:description" content="Better Profiles. Bigger Opportunities.">
+  <meta property="og:image" content="assets/khutwa-brand-banner.jpg">
+  <title>خُطوة | نموّك المهني</title>
+  <link rel="icon" href="assets/khutwa-mark.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/content.js"></script>
+  <script defer src="assets/js/app.js"></script>
+</head>
+<body>
+  <div class="announcement" id="announcement">
+    <div class="container announcement-inner">
+      <span data-ar="خصومات خاصة عند جمع الخدمات والموضوعات — اسأل عن عرضك قبل تأكيد الطلب." data-en="Special offers are available when combining services and topics—ask for your offer before confirming.">خصومات خاصة عند جمع الخدمات والموضوعات — اسأل عن عرضك قبل تأكيد الطلب.</span>
+      <a href="#packages" data-ar="اكتشف خياراتك" data-en="Explore options">اكتشف خياراتك</a>
+      <button class="announcement-close" id="closeAnnouncement" aria-label="إغلاق">×</button>
+    </div>
+  </div>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="#home" aria-label="Khutwa home">
+        <span class="brand-image-wrap"><img class="brand-image" src="assets/khutwa-mark.jpg" alt="شعار خُطوة" data-fallback="mark"><span class="brand-fallback">خ</span></span>
+        <span class="brand-name">خُطوة<small>KHUTWA · TUTOR GROWTH & SUPPORT</small></span>
+      </a>
+      <nav class="navlinks" id="navlinks" aria-label="التنقل الرئيسي">
+        <a href="#services" data-ar="الخدمات" data-en="Services">الخدمات</a>
+        <a href="#library" data-ar="المكتبة" data-en="Library">المكتبة</a>
+        <a href="#packages" data-ar="الباقات" data-en="Packages">الباقات</a>
+        <a href="#market" data-ar="اكتشف السوق" data-en="Market Match">اكتشف السوق</a>
+        <a href="#portfolio" data-ar="الأعمال" data-en="Portfolio">الأعمال</a>
+        <a href="#vision" data-ar="رؤيتنا" data-en="Our vision">رؤيتنا</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-button lang-button" id="langBtn" type="button" aria-label="Switch language">EN</button>
+        <button class="icon-button cart-shortcut" id="cartShortcut" type="button" aria-label="فتح السلة">السلة <span id="cartCount">0</span></button>
+        <button class="icon-button menu-button" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
+        <a class="button button-primary nav-cta" href="#request" data-ar="ابدأ خطوتك" data-en="Take your next step">ابدأ خطوتك</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-glow glow-one"></div><div class="hero-glow glow-two"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span id="heroEyebrow">نموّك المهني يبدأ بخطوة واضحة</span></div>
+          <h1 id="heroTitle">خبرتك في التدريس تستحق <span>حضورًا مهنيًا أقوى.</span></h1>
+          <p id="heroSubtitle" class="hero-description">خُطوة تساعد المدرسين على تقديم خبراتهم بوضوح، واختيار المنصات المناسبة، وتطوير بروفايلاتهم، وإنتاج الفيديوهات، وبناء مهارات تدريسية ومهنية تساعدهم على النمو والوصول إلى المتعلمين.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#services" id="heroPrimary">اكتشف ما يناسبك <span>←</span></a>
+            <button class="button button-glass" type="button" data-open-guide id="heroGuide">اسأل مرشد خُطوة</button>
+          </div>
+          <div class="hero-proof-row">
+            <div><b>01</b><span data-ar="افهم احتياجك" data-en="Understand your need">افهم احتياجك</span></div>
+            <div><b>02</b><span data-ar="اختر ما يناسبك" data-en="Choose what fits">اختر ما يناسبك</span></div>
+            <div><b>03</b><span data-ar="ابدأ بخطوة واضحة" data-en="Take a clear next step">ابدأ بخطوة واضحة</span></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-image-frame">
+            <img src="assets/khutwa-brand-banner.jpg" alt="خُطوة — Better Profiles. Bigger Opportunities." class="hero-banner" data-fallback="banner">
+            <div class="image-fallback"><span>خُطوة</span><small>Better Profiles. Bigger Opportunities.</small></div>
+          </div>
+          <div class="floating-note note-top"><span>✦</span><div><b data-ar="خطوة تناسب احتياجك" data-en="A step that fits your need">خطوة تناسب احتياجك</b><small data-ar="مش باقة واحدة للجميع" data-en="Not one package for everyone">مش باقة واحدة للجميع</small></div></div>
+          <div class="floating-note note-bottom"><span>↗</span><div><b data-ar="من الحضور إلى النمو" data-en="From presence to growth">من الحضور إلى النمو</b><small data-ar="بخطة عملية قابلة للتطوير" data-en="With a practical, evolving plan">بخطة عملية قابلة للتطوير</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro-section" id="about">
+      <div class="container">
+        <div class="section-heading center-heading">
+          <span class="section-kicker" data-ar="فلسفة خُطوة" data-en="THE KHUTWA APPROACH">فلسفة خُطوة</span>
+          <h2 data-ar="مش مجرد خدمة تشتريها… دي خطوة في مسارك المهني." data-en="More than a service. A meaningful step in your professional journey.">مش مجرد خدمة تشتريها… دي خطوة في مسارك المهني.</h2>
+          <p data-ar="نبدأ بفهم التخصص والخبرة والهدف، ثم نرشح ما تحتاجه بالفعل. لا نريدك أن تشتري خدمات لا تخدمك." data-en="We start by understanding your subject, experience, and goals, then recommend what you genuinely need. We do not want you to buy services that do not serve you.">نبدأ بفهم التخصص والخبرة والهدف، ثم نرشح ما تحتاجه بالفعل. لا نريدك أن تشتري خدمات لا تخدمك.</p>
+        </div>
+        <div class="value-grid">
+          <article class="value-card"><span class="value-icon">⌖</span><h3 data-ar="نفهم نقطة البداية" data-en="Understand your starting point">نفهم نقطة البداية</h3><p data-ar="نراجع خبرتك وتخصصك والمنصة والجمهور الذي تستهدفه." data-en="We review your expertise, subject, platform, and target audience.">نراجع خبرتك وتخصصك والمنصة والجمهور الذي تستهدفه.</p></article>
+          <article class="value-card"><span class="value-icon">✦</span><h3 data-ar="نركّب الحل المناسب" data-en="Build the right combination">نركّب الحل المناسب</h3><p data-ar="خدمات وموضوعات وجلسات يمكن جمعها في طلب واحد وفق احتياجك." data-en="Services, topics, and sessions can be combined into one request around your needs.">خدمات وموضوعات وجلسات يمكن جمعها في طلب واحد وفق احتياجك.</p></article>
+          <article class="value-card"><span class="value-icon">↗</span><h3 data-ar="نتحرك بواقعية" data-en="Move with realistic steps">نتحرك بواقعية</h3><p data-ar="نحدد نطاق العمل والتكلفة والخطوات قبل البدء، دون وعود بنتائج لا نملك التحكم فيها." data-en="We confirm scope, cost, and next steps before work begins, without promising outcomes outside our control.">نحدد نطاق العمل والتكلفة والخطوات قبل البدء، دون وعود بنتائج لا نملك التحكم فيها.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="services">
+      <div class="container">
+        <div class="section-heading split-heading">
+          <div><span class="section-kicker" data-ar="خدمات خُطوة" data-en="KHUTWA SERVICES">خدمات خُطوة</span><h2 data-ar="اختَر الخدمة… واعرف بالضبط ماذا ستحصل عليه." data-en="Choose a service—and know exactly what it includes.">اختَر الخدمة… واعرف بالضبط ماذا ستحصل عليه.</h2></div>
+          <p data-ar="كل خدمة لها نطاق وتسليمات وشروط واضحة. افتح التفاصيل قبل الإضافة إلى سلتك." data-en="Every service has a defined scope, deliverables, and terms. Review the details before adding it to your basket.">كل خدمة لها نطاق وتسليمات وشروط واضحة. افتح التفاصيل قبل الإضافة إلى سلتك.</p>
+        </div>
+        <div class="services-grid" id="servicesGrid"></div>
+        <div class="service-footnote" data-ar="جميع الأسعار بالدولار الأمريكي كسعر إطلاق. أي نطاق موسع أو طلب خاص يُسعّر ويُعتمد كتابةً قبل بدء العمل. لا تشمل الأسعار ميزانيات الإعلانات أو رسوم الناشرين." data-en="All prices are launch prices in USD. Extended scope or custom requests are quoted and confirmed in writing before work begins. Prices exclude advertising spend and publisher fees.">جميع الأسعار بالدولار الأمريكي كسعر إطلاق. أي نطاق موسع أو طلب خاص يُسعّر ويُعتمد كتابةً قبل بدء العمل. لا تشمل الأسعار ميزانيات الإعلانات أو رسوم الناشرين.</div>
+        <div class="catalog-banner">
+          <div><span class="catalog-icon">▤</span><div><b data-ar="تحب تشوف كتالوج واتساب؟" data-en="Want to view the WhatsApp catalog?">تحب تشوف كتالوج واتساب؟</b><p data-ar="اطلب من فريق خُطوة إرسال الكتالوج المحدث لك." data-en="Ask the Khutwa team to send you the latest catalog.">اطلب من فريق خُطوة إرسال الكتالوج المحدث لك.</p></div></div>
+          <a class="button button-outline" id="catalogLink" target="_blank" rel="noopener" href="https://wa.me/201557898203?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%AC%D9%88%20%D8%A5%D8%B1%D8%B3%D8%A7%D9%84%20%D9%83%D8%AA%D8%A7%D9%84%D9%88%D8%AC%20%D8%AE%D9%8F%D8%B7%D9%88%D8%A9%20%D8%A7%D9%84%D9%85%D8%AD%D8%AF%D8%AB."><span data-ar="اطلب الكتالوج" data-en="Request catalog">اطلب الكتالوج</span> ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section library-section" id="library">
+      <div class="container">
+        <div class="section-heading split-heading">
+          <div><span class="section-kicker" data-ar="Khutwa Learning Library" data-en="KHUTWA LEARNING LIBRARY">Khutwa Learning Library</span><h2 data-ar="مش لازم تشتري جلسة كاملة… اختَر الموضوع اللي تحتاجه." data-en="You don't need a whole session. Choose the topics you need.">مش لازم تشتري جلسة كاملة… اختَر الموضوع اللي تحتاجه.</h2></div>
+          <p data-ar="المكتبة مبنية من مسارات مقترحة وموضوعات مستقلة. اجمع موضوعات من أكثر من مسار، أو اطلب تركيبة خاصة بك." data-en="The library combines curated paths and individual topics. Mix topics from different paths or request a custom combination.">المكتبة مبنية من مسارات مقترحة وموضوعات مستقلة. اجمع موضوعات من أكثر من مسار، أو اطلب تركيبة خاصة بك.</p>
+        </div>
+        <div class="library-intro-band">
+          <div class="library-price"><span data-ar="سعر الإطلاق للموضوع الواحد" data-en="Launch price per topic">سعر الإطلاق للموضوع الواحد</span><strong>$3</strong><small data-ar="والعروض الخاصة متاحة عند جمع عدة موضوعات." data-en="Special offers are available for multi-topic selections.">والعروض الخاصة متاحة عند جمع عدة موضوعات.</small></div>
+          <div class="library-method"><b data-ar="كيف تعمل المكتبة؟" data-en="How the library works">كيف تعمل المكتبة؟</b><p data-ar="تختار الموضوعات، ونعدّ كل موضوع كمادة مصورة مستقلة، ثم نرتب الموضوعات التي اخترتها في جلسة مترابطة ونجهز المونتاج والتسليم وفق نطاق الطلب. لا تحتاج إلى شراء مسار كامل أو موضوعات لا تناسبك." data-en="Choose topics. Each topic is prepared as a separate recorded learning unit, then your selected units are arranged into a coherent session and edited for delivery. You do not need to buy a full path or unrelated topics.">تختار الموضوعات، ونعدّ كل موضوع كمادة مصورة مستقلة، ثم نرتب الموضوعات التي اخترتها في جلسة مترابطة ونجهز المونتاج والتسليم وفق نطاق الطلب. لا تحتاج إلى شراء مسار كامل أو موضوعات لا تناسبك.</p></div>
+        </div>
+        <div class="library-controls">
+          <div class="library-tabs" role="tablist" aria-label="تصفية الموضوعات">
+            <button class="filter-tab active" type="button" data-topic-filter="all" data-ar="كل الموضوعات" data-en="All topics">كل الموضوعات</button>
+            <button class="filter-tab" type="button" data-topic-filter="teaching" data-ar="مهارات التدريس" data-en="Teaching skills">مهارات التدريس</button>
+            <button class="filter-tab" type="button" data-topic-filter="growth" data-ar="النمو المهني" data-en="Professional growth">النمو المهني</button>
+          </div>
+          <label class="search-box"><span>⌕</span><input id="topicSearch" type="search" placeholder="ابحث عن موضوع أو مشكلة…" aria-label="البحث في الموضوعات"></label>
+        </div>
+        <div class="path-grid" id="pathGrid"></div>
+        <div class="topic-empty hidden" id="topicEmpty" data-ar="لم نعثر على موضوع مطابق. اكتب لنا ما تحتاجه في خانة الموضوع المخصص." data-en="No matching topic found. Describe your need in the custom-topic field.">لم نعثر على موضوع مطابق. اكتب لنا ما تحتاجه في خانة الموضوع المخصص.</div>
+        <div class="custom-topic-panel">
+          <div><span class="section-kicker" data-ar="موضوعك أنت" data-en="YOUR TOPIC">موضوعك أنت</span><h3 data-ar="مش لاقي الموضوع المناسب؟ اطلب تركيبة خاصة." data-en="Can't find the right topic? Request a custom combination.">مش لاقي الموضوع المناسب؟ اطلب تركيبة خاصة.</h3><p data-ar="اكتب المشكلة أو الموضوعات التي تريد مناقشتها. سنراجعها ونقترح طريقة التجميع والتكلفة قبل التأكيد." data-en="Describe the challenge or topics you want to cover. We will review the request and suggest a suitable combination and price before confirmation.">اكتب المشكلة أو الموضوعات التي تريد مناقشتها. سنراجعها ونقترح طريقة التجميع والتكلفة قبل التأكيد.</p></div>
+          <div class="custom-topic-fields"><textarea id="customTopic" rows="3" placeholder="مثال: أريد موضوعات عن الحصة التجريبية، تشخيص المستوى، وتحويل الاستفسار إلى طالب منتظم."></textarea><button class="button button-primary" id="addCustomTopic" type="button" data-ar="أضف طلبي المخصص للسلة" data-en="Add custom topic request">أضف طلبي المخصص للسلة</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="packages">
+      <div class="container">
+        <div class="section-heading center-heading"><span class="section-kicker" data-ar="حلول مركبة" data-en="CURATED COMBINATIONS">حلول مركبة</span><h2 data-ar="أحيانًا تحتاج أكثر من خدمة… وده طبيعي." data-en="Sometimes you need more than one service—and that's okay.">أحيانًا تحتاج أكثر من خدمة… وده طبيعي.</h2><p data-ar="اختر باقة مقترحة أو كوّن طلبك بنفسك. الخصومات والعروض تُحدد وفق مكونات الطلب، ويمكنك السؤال عن عرضك الخاص." data-en="Choose a suggested combination or build your own request. Offers depend on the items selected—ask about your tailored offer.">اختر باقة مقترحة أو كوّن طلبك بنفسك. الخصومات والعروض تُحدد وفق مكونات الطلب، ويمكنك السؤال عن عرضك الخاص.</p></div>
+        <div class="package-grid" id="packageGrid"></div>
+        <div class="discount-note"><span>✦</span><p data-ar="فيه خصومات خاصة على بعض التجميعات. لا يوجد خصم تلقائي على كل سلة؛ فريق خُطوة يراجع مكونات طلبك ويؤكد العرض قبل موافقتك." data-en="Special discounts may apply to selected combinations. Discounts are not automatically applied to every basket; Khutwa reviews your request and confirms any offer before you accept.">فيه خصومات خاصة على بعض التجميعات. لا يوجد خصم تلقائي على كل سلة؛ فريق خُطوة يراجع مكونات طلبك ويؤكد العرض قبل موافقتك.</p></div>
+        <div class="cart-panel" id="cartPanel">
+          <div class="cart-head"><div><span class="section-kicker" data-ar="طلبك" data-en="YOUR REQUEST">طلبك</span><h3 data-ar="سلة خدماتك وموضوعاتك" data-en="Your services and topics basket">سلة خدماتك وموضوعاتك</h3><p data-ar="اجمع أكثر من خدمة وموضوع في طلب واحد." data-en="Combine multiple services and topics in one request.">اجمع أكثر من خدمة وموضوع في طلب واحد.</p></div><button class="text-button" id="clearBasket" type="button" data-ar="إفراغ السلة" data-en="Clear basket">إفراغ السلة</button></div>
+          <div class="cart-empty" id="cartEmpty" data-ar="لسه ما اخترتش حاجة. ابدأ بإضافة خدمة أو موضوع يعبر عن احتياجك." data-en="Your basket is empty. Add a service or topic that fits your needs.">لسه ما اخترتش حاجة. ابدأ بإضافة خدمة أو موضوع يعبر عن احتياجك.</div>
+          <div class="cart-items" id="cartItems"></div>
+          <div class="basket-recommendations" id="basketRecommendations"></div>
+          <div class="cart-summary"><div><small data-ar="الإجمالي المبدئي للأسعار المعلنة" data-en="Subtotal of listed prices">الإجمالي المبدئي للأسعار المعلنة</small><strong id="cartTotal">$0.00</strong><small id="cartQuoteNote" data-ar="العناصر التي تحتاج عرض سعر والخصومات الخاصة تُراجع قبل الاتفاق." data-en="Quoted items and special offers are confirmed before agreement.">العناصر التي تحتاج عرض سعر والخصومات الخاصة تُراجع قبل الاتفاق.</small></div><button class="button button-primary" id="goToRequest" type="button" data-ar="استكمل طلبك" data-en="Continue request">استكمل طلبك</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="market">
+      <div class="container">
+        <div class="section-heading split-heading"><div><span class="section-kicker" data-ar="Market Match · Market Insights" data-en="MARKET MATCH · MARKET INSIGHTS">Market Match · Market Insights</span><h2 data-ar="اختيار المنصة يبدأ من تخصصك… مش من شهرتها." data-en="Choose a platform for your subject—not just its popularity.">اختيار المنصة يبدأ من تخصصك… مش من شهرتها.</h2></div><p data-ar="ابدأ ببحث أولي عن المنصات والأكاديميات، ثم اطلب من فريق خُطوة مراجعة بشرية للمصادر والملاءمة والمنافسة." data-en="Start with preliminary platform discovery, then request a human review of sources, fit, and competition.">ابدأ ببحث أولي عن المنصات والأكاديميات، ثم اطلب من فريق خُطوة مراجعة بشرية للمصادر والملاءمة والمنافسة.</p></div>
+        <div class="market-layout">
+          <div class="market-panel">
+            <div class="market-panel-top"><span class="market-symbol">⌕</span><div><b data-ar="مستكشف المنصات" data-en="Platform discovery">مستكشف المنصات</b><small data-ar="بحث أولي يفتح مصادر خارجية" data-en="Preliminary search across external sources">بحث أولي يفتح مصادر خارجية</small></div></div>
+            <div class="form-grid market-form-grid">
+              <div class="form-field full"><label for="marketSubject" data-ar="التخصص أو المادة" data-en="Subject or teaching area">التخصص أو المادة</label><input id="marketSubject" placeholder="مثال: Arabic for non-native speakers"></div>
+              <div class="form-field"><label for="marketLearnerLang" data-ar="لغة الطلاب" data-en="Learner language">لغة الطلاب</label><select id="marketLearnerLang"><option value="English">English</option><option value="Arabic">العربية</option><option value="Spanish">Español</option><option value="French">Français</option><option value="German">Deutsch</option><option value="Other">أخرى</option></select></div>
+              <div class="form-field"><label for="marketCountry" data-ar="البلد المستهدف" data-en="Target country">البلد المستهدف</label><input id="marketCountry" placeholder="مثال: Germany"></div>
+              <div class="form-field full"><label for="marketAudience" data-ar="نوع المتعلم" data-en="Learner type">نوع المتعلم</label><select id="marketAudience"><option value="adults">بالغون</option><option value="children">أطفال</option><option value="school">طلاب مدارس</option><option value="university">طلاب جامعات</option><option value="professionals">مهنيون</option><option value="all">كل الفئات</option></select></div>
+            </div>
+            <button class="button button-primary full-button" id="runMarketSearch" type="button" data-ar="اعرض مصادر البحث الأولي" data-en="Show preliminary sources">اعرض مصادر البحث الأولي</button>
+            <div id="marketResults" class="market-results" aria-live="polite"></div>
+            <p class="market-disclaimer" data-ar="هذه روابط بحث أولي وليست تحليلًا آليًا أو توصية نهائية. فريق خُطوة يراجع المصادر المتاحة ويؤكد تاريخ البحث وحدود العينة في التقرير البشري." data-en="These are preliminary search links, not automated analysis or a final recommendation. Khutwa reviews available sources and records the research date and sample limitations in the human report.">هذه روابط بحث أولي وليست تحليلًا آليًا أو توصية نهائية. فريق خُطوة يراجع المصادر المتاحة ويؤكد تاريخ البحث وحدود العينة في التقرير البشري.</p>
+            <button class="button button-outline full-button" id="requestMarketAnalysis" type="button" data-ar="اطلب مراجعة بشرية للسوق" data-en="Request human market review">اطلب مراجعة بشرية للسوق</button>
+          </div>
+          <div class="market-side">
+            <article class="market-benefit"><span>01</span><h3>Market Match</h3><p data-ar="ترشيح المنصات والأكاديميات وفق التخصص واللغة والخبرة ونوع الطلاب." data-en="Match platforms and academies to your subject, language, experience, and learner audience.">ترشيح المنصات والأكاديميات وفق التخصص واللغة والخبرة ونوع الطلاب.</p></article>
+            <article class="market-benefit"><span>02</span><h3>Market Insights</h3><p data-ar="دراسة عروض المنافسين والأسعار الظاهرة والفرص والتحديات من مصادر متاحة." data-en="Review competitor offerings, publicly visible prices, opportunities, and challenges using available sources.">دراسة عروض المنافسين والأسعار الظاهرة والفرص والتحديات من مصادر متاحة.</p></article>
+            <article class="market-benefit"><span>03</span><h3>Profile Benchmark</h3><p data-ar="مقارنة طريقة عرض البروفايل بعينات ملائمة وتحديد فرص التحسين دون نسخ أعمال الغير." data-en="Compare profile presentation with relevant examples and identify improvements without copying others' work.">مقارنة طريقة عرض البروفايل بعينات ملائمة وتحديد فرص التحسين دون نسخ أعمال الغير.</p></article>
+            <div class="market-cta"><b data-ar="تريد من خُطوة اختيار المنصة معك؟" data-en="Want Khutwa to help select your platform?">تريد من خُطوة اختيار المنصة معك؟</b><p data-ar="أضف إنشاء البروفايل إلى طلبك، وسنراجع ملاءمة المنصة ضمن الخدمة." data-en="Add Profile Creation to your request; platform fit review is included in that service.">أضف إنشاء البروفايل إلى طلبك، وسنراجع ملاءمة المنصة ضمن الخدمة.</p><button class="button button-soft" data-add-service="profile_creation" type="button" data-ar="أضف إنشاء بروفايل" data-en="Add Profile Creation">أضف إنشاء بروفايل</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="promotion">
+      <div class="container">
+        <div class="section-heading center-heading"><span class="section-kicker" data-ar="بعد إنتاج الفيديو" data-en="AFTER VIDEO PRODUCTION">بعد إنتاج الفيديو</span><h2 data-ar="مش بس ننتج الفيديو… نقدر ندرس أين يصل." data-en="We can do more than produce the video—we can assess where it should appear.">مش بس ننتج الفيديو… نقدر ندرس أين يصل.</h2><p data-ar="اختياري: اطلب دراسة توزيع الفيديو على قنوات ومواقع يتناسب جمهورها مع تخصصك. فرديًا أو ضمن حملة مشتركة." data-en="Optional: request an assessment of video placements on channels and websites whose audience fits your subject—individually or as part of a shared campaign.">اختياري: اطلب دراسة توزيع الفيديو على قنوات ومواقع يتناسب جمهورها مع تخصصك. فرديًا أو ضمن حملة مشتركة.</p></div>
+        <div class="promotion-grid">
+          <article class="promotion-card"><div class="promo-icon">◉</div><span class="tag">INDIVIDUAL</span><h3 data-ar="حملة فردية" data-en="Individual campaign">حملة فردية</h3><p data-ar="دراسة جمهورك والقنوات المناسبة وإعداد خطة ترويج خاصة بك." data-en="Assess your audience and suitable channels, then build a promotion plan for you.">دراسة جمهورك والقنوات المناسبة وإعداد خطة ترويج خاصة بك.</p><button class="button button-outline" data-add-service="campaign_review" type="button" data-ar="أضف دراسة الحملة" data-en="Add campaign assessment">أضف دراسة الحملة</button></article>
+          <article class="promotion-card promotion-highlight"><div class="promo-icon">◎</div><span class="tag">COLLECTIVE</span><h3 data-ar="حملة مشتركة" data-en="Collective campaign">حملة مشتركة</h3><p data-ar="الانضمام إلى مجموعة مدرسين في تخصصات متقاربة، وتقسيم تكلفة النشر وفق اتفاق واضح." data-en="Join educators in related subjects and share placement costs under a clear agreement.">الانضمام إلى مجموعة مدرسين في تخصصات متقاربة، وتقسيم تكلفة النشر وفق اتفاق واضح.</p><button class="button button-primary" data-add-service="campaign_review" type="button" data-ar="اطلب دراسة حملة مشتركة" data-en="Request a collective campaign">اطلب دراسة حملة مشتركة</button></article>
+          <article class="promotion-card"><div class="promo-icon">↗</div><span class="tag">MEASUREMENT</span><h3 data-ar="نقيس ما يهم" data-en="Measure what matters">نقيس ما يهم</h3><p data-ar="الهدف هو الاستفسارات والعملاء المحتملون، لا المشاهدات وحدها. ميزانية الإعلان منفصلة عن أجر خُطوة." data-en="The goal is inquiries and leads—not views alone. Advertising spend is separate from Khutwa's fee.">الهدف هو الاستفسارات والعملاء المحتملون، لا المشاهدات وحدها. ميزانية الإعلان منفصلة عن أجر خُطوة.</p><span class="metric-tags"><i>Clicks</i><i>Profile visits</i><i>Inquiries</i></span></article>
+        </div>
+        <p class="fine-print" data-ar="لا نضمن عدد مشاهدات أو عملاء أو حجوزات. لا تُشترى مساحة إعلانية قبل موافقة العميل على القناة والتكلفة والميزانية. نستخدم ناشرين ومواقع مناسبة وموثوقة ونتجنب المواقع المخالفة لحقوق المحتوى أو شروط المنصات." data-en="No views, customers, or bookings are guaranteed. No placement is purchased before the client approves the channel, costs, and budget. We use suitable, reputable publishers and avoid sites that infringe content rights or platform terms.">لا نضمن عدد مشاهدات أو عملاء أو حجوزات. لا تُشترى مساحة إعلانية قبل موافقة العميل على القناة والتكلفة والميزانية. نستخدم ناشرين ومواقع مناسبة وموثوقة ونتجنب المواقع المخالفة لحقوق المحتوى أو شروط المنصات.</p>
+      </div>
+    </section>
+
+    <section class="section" id="portfolio">
+      <div class="container">
+        <div class="section-heading split-heading"><div><span class="section-kicker" data-ar="نماذج من الأعمال" data-en="SELECTED WORK">نماذج من الأعمال</span><h2 data-ar="أمثلة من أعمال خُطوة." data-en="Examples from Khutwa's work.">أمثلة من أعمال خُطوة.</h2></div><p data-ar="استعرض نماذج الفيديوهات والبروفايلات. الروابط تفتح الملفات الأصلية على Google Drive." data-en="Explore video and profile samples. Links open the original files on Google Drive.">استعرض نماذج الفيديوهات والبروفايلات. الروابط تفتح الملفات الأصلية على Google Drive.</p></div>
+        <div class="portfolio-tabs"><button class="filter-tab active" data-portfolio-tab="videos" type="button" data-ar="الفيديوهات" data-en="Videos">الفيديوهات</button><button class="filter-tab" data-portfolio-tab="profiles" type="button" data-ar="البروفايلات" data-en="Profiles">البروفايلات</button></div>
+        <div class="portfolio-grid" id="portfolioGrid"></div>
+        <p class="fine-print" data-ar="نعرض النماذج باعتبارها أعمالًا أو موادًا أرسلها فريق خُطوة للعرض. لا تُنسب أعمال الغير إلى خُطوة، ويجب التأكد من صلاحيات مشاركة الملفات قبل النشر العام." data-en="Samples are presented as work or materials supplied for display by Khutwa. Third-party work is not claimed as Khutwa's; sharing permissions must be confirmed before public launch.">نعرض النماذج باعتبارها أعمالًا أو موادًا أرسلها فريق خُطوة للعرض. لا تُنسب أعمال الغير إلى خُطوة، ويجب التأكد من صلاحيات مشاركة الملفات قبل النشر العام.</p>
+      </div>
+    </section>
+
+    <section class="section future-section" id="vision">
+      <div class="container future-grid">
+        <div class="future-copy"><span class="section-kicker" data-ar="رؤية المستقبل" data-en="THE LONG-TERM VISION">رؤية المستقبل</span><h2 id="visionTitle">خُطوة أكبر من الخدمات التي نقدمها اليوم.</h2><p id="visionBody">نطمح إلى بناء منصة تعليمية ومهنية تجمع المدرسين والطلاب والموجهين، وتوفر مساحات للتعلم والتواصل والتطوير والفرص. نبدأ اليوم بخدمات عملية نفهم من خلالها احتياجات المعلمين والمتعلمين، ونطوّر رؤيتنا بالتعاون مع مجتمعنا.</p><div class="future-actions"><button class="button button-primary" id="futureIdeaBtn" type="button" data-ar="شاركنا فكرتك" data-en="Share your idea">شاركنا فكرتك</button><a class="button button-glass" href="#request" data-ar="ابدأ معنا الآن" data-en="Start with us today">ابدأ معنا الآن</a></div></div>
+        <div class="future-cards" id="visionFeatures"></div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="process">
+      <div class="container">
+        <div class="section-heading center-heading"><span class="section-kicker" data-ar="كيف نعمل" data-en="HOW WE WORK">كيف نعمل</span><h2 data-ar="من أول فكرة إلى تسليم واضح." data-en="From first idea to a clear delivery.">من أول فكرة إلى تسليم واضح.</h2></div>
+        <div class="process-grid">
+          <article><b>01</b><h3 data-ar="حدد احتياجك" data-en="Tell us what you need">حدد احتياجك</h3><p data-ar="اختر خدماتك وموضوعاتك أو تحدث مع مرشد خُطوة." data-en="Select services and topics or talk to the Khutwa Guide.">اختر خدماتك وموضوعاتك أو تحدث مع مرشد خُطوة.</p></article>
+          <article><b>02</b><h3 data-ar="أرسل طلبًا منظمًا" data-en="Send a structured request">أرسل طلبًا منظمًا</h3><p data-ar="أكمل التفاصيل الخاصة بالخدمات التي اخترتها في النموذج المناسب." data-en="Complete the relevant details for the services you selected.">أكمل التفاصيل الخاصة بالخدمات التي اخترتها في النموذج المناسب.</p></article>
+          <article><b>03</b><h3 data-ar="اتفاق واضح" data-en="Agree on the scope">اتفاق واضح</h3><p data-ar="نراجع الطلب ونؤكد السعر والخصم والمدة والدفعات ووسيلة الدفع كتابةً." data-en="We review the request and confirm price, offer, timeline, installments, and payment method in writing.">نراجع الطلب ونؤكد السعر والخصم والمدة والدفعات ووسيلة الدفع كتابةً.</p></article>
+          <article><b>04</b><h3 data-ar="تنفيذ وتسليم" data-en="Work and delivery">تنفيذ وتسليم</h3><p data-ar="ننفذ ما تم الاتفاق عليه، ونسلم الملفات أو التقرير ونتابع وفق نطاق الخدمة." data-en="We deliver the agreed work, files, or report and follow up within the service scope.">ننفذ ما تم الاتفاق عليه، ونسلم الملفات أو التقرير ونتابع وفق نطاق الخدمة.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section request-section" id="request">
+      <div class="container">
+        <div class="section-heading center-heading"><span class="section-kicker" data-ar="طلب خدمة" data-en="REQUEST A SERVICE">طلب خدمة</span><h2 data-ar="جهّز طلبك… وإحنا نراجع التفاصيل معك." data-en="Prepare your request—we'll review the details with you.">جهّز طلبك… وإحنا نراجع التفاصيل معك.</h2><p data-ar="يمكنك طلب أكثر من خدمة وموضوع في طلب واحد. البيانات هنا تُجهز في ملخص، ثم تُرسل عبر نموذج Google Forms بعد ربطه من خُطوة." data-en="You can combine multiple services and topics in one request. Details are prepared in a summary and submitted through Google Forms once Khutwa connects the form.">يمكنك طلب أكثر من خدمة وموضوع في طلب واحد. البيانات هنا تُجهز في ملخص، ثم تُرسل عبر نموذج Google Forms بعد ربطه من خُطوة.</p></div>
+        <div class="request-layout">
+          <aside class="request-aside">
+            <div class="request-aside-card"><span class="aside-icon">✦</span><h3 data-ar="قبل إرسال الطلب" data-en="Before you submit">قبل إرسال الطلب</h3><p data-ar="تأكد من اختيار ما تحتاجه فقط، واكتب معلومات تساعدنا على فهم هدفك. يمكنك إضافة روابط للمواد بدل إرسال كلمات مرور أو بيانات دخول." data-en="Select only what you need and include information that helps us understand your goal. Share links to materials instead of passwords or login details.">تأكد من اختيار ما تحتاجه فقط، واكتب معلومات تساعدنا على فهم هدفك. يمكنك إضافة روابط للمواد بدل إرسال كلمات مرور أو بيانات دخول.</p></div>
+            <div class="contact-card"><h3 data-ar="تواصل مع خُطوة" data-en="Contact Khutwa">تواصل مع خُطوة</h3><a id="whatsappContact" href="https://wa.me/201557898203" target="_blank" rel="noopener">WhatsApp <span>↗</span></a><a id="emailContact" href="mailto:khotwatutors@gmail.com">khotwatutors@gmail.com</a><a id="linkedinContact" href="https://www.linkedin.com/in/abdullah-essam-764059423/" target="_blank" rel="noopener">LinkedIn <span>↗</span></a><p data-ar="يُستخدم واتساب للتفاوض والمتابعة وتأكيد تفاصيل العمل، وليس بدلًا من نموذج الطلب." data-en="WhatsApp is used for negotiation, follow-up, and confirming work details—not as a replacement for the request form.">يُستخدم واتساب للتفاوض والمتابعة وتأكيد تفاصيل العمل، وليس بدلًا من نموذج الطلب.</p></div>
+          </aside>
+          <form id="requestForm" class="request-form" novalidate>
+            <div class="form-title-row"><div><span class="section-kicker" data-ar="نموذج الطلب الموحد" data-en="UNIFIED REQUEST FORM">نموذج الطلب الموحد</span><h3 data-ar="معلوماتك واحتياجك" data-en="Your details and needs">معلوماتك واحتياجك</h3></div><span class="form-step-label" data-ar="الخطوة 1 من 1" data-en="Step 1 of 1">الخطوة 1 من 1</span></div>
+            <div id="requestSelected" class="request-selected"><span data-ar="اختيارات السلة" data-en="Basket selection">اختيارات السلة</span><div id="requestSelectedItems" data-ar="لم تتم إضافة خدمات بعد." data-en="No services added yet.">لم تتم إضافة خدمات بعد.</div></div>
+            <div class="form-section-label" data-ar="بيانات التواصل" data-en="CONTACT DETAILS">بيانات التواصل</div>
+            <div class="form-grid">
+              <div class="form-field"><label for="clientName"><span data-ar="الاسم الكامل" data-en="Full name">الاسم الكامل</span> *</label><input id="clientName" name="name" required autocomplete="name" placeholder="اكتب اسمك"></div>
+              <div class="form-field"><label for="clientWhatsApp"><span data-ar="رقم واتساب مع كود الدولة" data-en="WhatsApp with country code">رقم واتساب مع كود الدولة</span> *</label><input id="clientWhatsApp" name="whatsapp" required autocomplete="tel" placeholder="+20..."></div>
+              <div class="form-field"><label for="clientEmail" data-ar="البريد الإلكتروني" data-en="Email address">البريد الإلكتروني</label><input id="clientEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com"></div>
+              <div class="form-field"><label for="clientCountry"><span data-ar="بلد الإقامة" data-en="Country">بلد الإقامة</span> *</label><input id="clientCountry" name="country" required placeholder="مثال: Egypt"></div>
+              <div class="form-field"><label for="clientSubject"><span data-ar="التخصص أو مجال التدريس" data-en="Subject or teaching area">التخصص أو مجال التدريس</span> *</label><input id="clientSubject" name="subject" required placeholder="مثال: اللغة العربية"></div>
+              <div class="form-field"><label for="clientExperience" data-ar="سنوات الخبرة" data-en="Teaching experience">سنوات الخبرة</label><select id="clientExperience" name="experience"><option value="">اختر</option><option>أقل من سنة</option><option>1–3 سنوات</option><option>4–7 سنوات</option><option>أكثر من 7 سنوات</option></select></div>
+              <div class="form-field"><label for="currentPlatform" data-ar="المنصة الحالية" data-en="Current platform">المنصة الحالية</label><input id="currentPlatform" name="currentPlatform" placeholder="Preply / italki / لا أستخدم منصة"></div>
+              <div class="form-field"><label for="targetPlatform" data-ar="المنصة المستهدفة إن وجدت" data-en="Target platform, if any">المنصة المستهدفة إن وجدت</label><input id="targetPlatform" name="targetPlatform" placeholder="اكتب اسم المنصة أو الأكاديمية"></div>
+            </div>
+            <div class="form-section-label" data-ar="تفاصيل إضافية بحسب طلبك" data-en="DETAILS BASED ON YOUR REQUEST">تفاصيل إضافية بحسب طلبك</div>
+            <div class="form-grid">
+              <div class="form-field full conditional-field" data-condition="profile"><label for="profileUrl" data-ar="رابط البروفايل الحالي (إن وجد)" data-en="Current profile link, if available">رابط البروفايل الحالي (إن وجد)</label><input id="profileUrl" name="profileLink" type="url" placeholder="https://..."></div>
+              <div class="form-field conditional-field" data-condition="video"><label for="videoType" data-ar="نوع الفيديو المطلوب" data-en="Video type">نوع الفيديو المطلوب</label><select id="videoType" name="videoType"><option value="">اختر النوع</option></select></div>
+              <div class="form-field conditional-field" data-condition="video"><label for="videoPlatform" data-ar="منصة استخدام الفيديو" data-en="Video destination">منصة استخدام الفيديو</label><input id="videoPlatform" name="videoPlatform" placeholder="YouTube / Preply / Instagram"></div>
+              <div class="form-field conditional-field" data-condition="video"><label for="videoDuration" data-ar="المدة التقريبية" data-en="Approximate duration">المدة التقريبية</label><input id="videoDuration" name="videoDuration" placeholder="30 ثانية / دقيقة"></div>
+              <div class="form-field conditional-field" data-condition="video"><label for="videoFootage" data-ar="المادة المتاحة" data-en="Available footage">المادة المتاحة</label><select id="videoFootage" name="footage"><option value="">اختر</option><option value="raw">لدي تصوير خام</option><option value="existing">لدي فيديو قائم</option><option value="script">أحتاج سيناريو وإرشادات تصوير</option><option value="none">لا توجد مواد بعد</option></select></div>
+              <div class="form-field conditional-field" data-condition="market"><label for="marketCountryRequest" data-ar="الدولة المستهدفة في دراسة السوق" data-en="Target country for market review">الدولة المستهدفة في دراسة السوق</label><input id="marketCountryRequest" name="marketCountry" placeholder="مثال: Germany"></div>
+              <div class="form-field conditional-field" data-condition="market"><label for="marketLanguageRequest" data-ar="لغة المتعلمين المستهدفين" data-en="Target learner language">لغة المتعلمين المستهدفين</label><input id="marketLanguageRequest" name="marketLearnerLanguage" placeholder="English / Arabic"></div>
+              <div class="form-field conditional-field" data-condition="promotion"><label for="campaignBudget" data-ar="ميزانية الإعلان التقريبية (اختياري)" data-en="Indicative ad budget (optional)">ميزانية الإعلان التقريبية (اختياري)</label><input id="campaignBudget" name="campaignBudget" placeholder="USD / اكتب ميزانيتك"></div>
+              <div class="form-field conditional-field" data-condition="promotion"><label for="preferredChannel" data-ar="قنوات الترويج المفضلة" data-en="Preferred promotion channels">قنوات الترويج المفضلة</label><input id="preferredChannel" name="preferredChannel" placeholder="YouTube / مواقع تعليمية / صناع محتوى"></div>
+              <div class="form-field full conditional-field" data-condition="topics"><label for="customTopicsInForm" data-ar="موضوعات إضافية أو تركيبة خاصة" data-en="Additional topics or custom combination">موضوعات إضافية أو تركيبة خاصة</label><textarea id="customTopicsInForm" name="customTopics" rows="3"></textarea></div>
+              <div class="form-field full"><label for="requestGoal"><span data-ar="اشرح ما تريد تحسينه أو تحقيقه" data-en="What would you like to improve or achieve?">اشرح ما تريد تحسينه أو تحقيقه</span> *</label><textarea id="requestGoal" name="goal" rows="4" required placeholder="كلما كانت التفاصيل أوضح، كان اقتراح خُطوة أدق."></textarea></div>
+            </div>
+            <label class="consent-row"><input id="requestConsent" name="consent" type="checkbox" required><span data-ar="أوافق على استخدام البيانات التي أقدمها لمراجعة طلبي والتواصل معي بشأنه. أعلم أن إرسال الطلب لا يعني قبول العمل أو بدء التنفيذ، وأن السعر والنطاق والمدة ووسيلة الدفع يتم تأكيدها كتابةً قبل البدء." data-en="I agree that the information I provide may be used to review and contact me about this request. Submission does not mean the work is accepted or has started; price, scope, timeline, and payment method are confirmed in writing before work begins.">أوافق على استخدام البيانات التي أقدمها لمراجعة طلبي والتواصل معي بشأنه. أعلم أن إرسال الطلب لا يعني قبول العمل أو بدء التنفيذ، وأن السعر والنطاق والمدة ووسيلة الدفع يتم تأكيدها كتابةً قبل البدء.</span></label>
+            <div class="request-actions"><button class="button button-primary" type="submit" data-ar="متابعة إلى نموذج Google Forms" data-en="Continue to Google Forms">متابعة إلى نموذج Google Forms</button><button class="button button-outline" type="button" id="saveRequestCopy" data-ar="حفظ ملخص الطلب" data-en="Save request summary">حفظ ملخص الطلب</button></div>
+            <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+            <p class="form-privacy" data-ar="ملاحظة تشغيلية: روابط Google Forms ومعرّفات حقولها تُضاف من ملف إعدادات خُطوة. قبل تفعيل الربط، يستطيع الزائر حفظ ملخص طلبه فقط؛ لن تظهر له رسالة توحي بأن الطلب وصل إلى فريق خُطوة." data-en="Operational note: Google Forms URLs and field IDs are configured in Khutwa's settings file. Before the connection is activated, visitors can only save a request summary; the site will not imply that their request reached Khutwa.">ملاحظة تشغيلية: روابط Google Forms ومعرّفات حقولها تُضاف من ملف إعدادات خُطوة. قبل تفعيل الربط، يستطيع الزائر حفظ ملخص طلبه فقط؛ لن تظهر له رسالة توحي بأن الطلب وصل إلى فريق خُطوة.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="faq">
+      <div class="container"><div class="section-heading center-heading"><span class="section-kicker">FAQ</span><h2 data-ar="أسئلة قبل أن تبدأ." data-en="Before you begin.">أسئلة قبل أن تبدأ.</h2></div><div class="faq-list" id="faqList"></div></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-main">
+      <div class="footer-brand"><div class="brand"><span class="brand-image-wrap"><img class="brand-image" src="assets/khutwa-mark.jpg" alt="Khutwa mark" data-fallback="mark"><span class="brand-fallback">خ</span></span><span class="brand-name">خُطوة<small>KHUTWA · TUTOR GROWTH & SUPPORT</small></span></div><p data-ar="Better Profiles. Bigger Opportunities. نساعد المدرسين على تحويل خبرتهم إلى حضور مهني أوضح وخطوات عملية نحو فرص تعليمية أفضل." data-en="Better Profiles. Bigger Opportunities. We help educators turn their expertise into a clearer professional presence and practical steps toward better teaching opportunities.">Better Profiles. Bigger Opportunities. نساعد المدرسين على تحويل خبرتهم إلى حضور مهني أوضح وخطوات عملية نحو فرص تعليمية أفضل.</p></div>
+      <div class="footer-links"><b data-ar="روابط مهمة" data-en="Quick links">روابط مهمة</b><a href="#services" data-ar="الخدمات" data-en="Services">الخدمات</a><a href="#library" data-ar="مكتبة الموضوعات" data-en="Topic library">مكتبة الموضوعات</a><a href="#vision" data-ar="رؤية خُطوة" data-en="Khutwa vision">رؤية خُطوة</a><a id="footerCatalog" href="https://wa.me/201557898203" target="_blank" rel="noopener" data-ar="كتالوج واتساب" data-en="WhatsApp catalog">كتالوج واتساب</a></div>
+      <div class="footer-links"><b data-ar="تواصل معنا" data-en="Connect">تواصل معنا</b><a href="mailto:khotwatutors@gmail.com">khotwatutors@gmail.com</a><a href="https://wa.me/201557898203" target="_blank" rel="noopener">WhatsApp</a><a href="https://www.linkedin.com/in/abdullah-essam-764059423/" target="_blank" rel="noopener">LinkedIn</a></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 Khutwa</span><span data-ar="نسخة تجريبية قابلة للتطوير — بعض التكاملات تنتظر إعداد حسابات خُطوة." data-en="Development preview—some integrations require Khutwa account setup.">نسخة تجريبية قابلة للتطوير — بعض التكاملات تنتظر إعداد حسابات خُطوة.</span></div>
+  </footer>
+
+  <button class="guide-launcher" id="guideLauncher" type="button" aria-label="مرشد خُطوة"><span class="guide-launcher-icon">✦</span><span data-ar="مرشد خُطوة" data-en="Khutwa Guide">مرشد خُطوة</span><i class="guide-status-dot"></i></button>
+  <section class="guide-panel" id="guidePanel" aria-label="مرشد خُطوة" aria-hidden="true">
+    <div class="guide-header"><div class="guide-avatar">خ</div><div><b data-ar="مرشد خُطوة" data-en="Khutwa Guide">مرشد خُطوة</b><small data-ar="خلينا نلاقي الخطوة المناسبة ليك" data-en="Let's find the right next step">خلينا نلاقي الخطوة المناسبة ليك</small></div><button class="guide-close" id="guideClose" type="button" aria-label="إغلاق">×</button></div>
+    <div class="guide-messages" id="guideMessages" aria-live="polite"></div>
+    <div class="guide-quick-actions" id="guideQuickActions"></div>
+    <form class="guide-input-row" id="guideForm"><input id="guideInput" type="text" autocomplete="off" placeholder="اكتب مشكلتك باختصار…"><button type="submit" aria-label="إرسال">➤</button></form>
+    <div class="guide-disclaimer" data-ar="مرشد تفاعلي يعتمد على موضوعات وخدمات خُطوة المحددة، وليس محادثة ذكاء اصطناعي متصلة بالإنترنت. لا يُرسل بياناتك إلى جهة خارجية." data-en="A guided helper using Khutwa's defined services and topics—not an internet-connected AI chatbot. Your messages are not sent to an external service.">مرشد تفاعلي يعتمد على موضوعات وخدمات خُطوة المحددة، وليس محادثة ذكاء اصطناعي متصلة بالإنترنت. لا يُرسل بياناتك إلى جهة خارجية.</div>
+  </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

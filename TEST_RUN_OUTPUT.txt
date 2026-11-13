@@ -1,0 +1,86 @@
+PASS content.js exposes Khutwa data version 4.0.0
+PASS 8 service records are defined
+PASS 15 learning paths are defined
+PASS 45 learning topics are defined
+PASS topic IDs are unique
+PASS 5 curated combinations are defined
+PASS 4 video portfolio links are defined
+PASS 6 profile portfolio links are defined
+PASS launch topic price is $3
+PASS private discount rules are not exposed in public site data
+PASS profile creation launch price is $30
+PASS profile development launch price is $20
+PASS standard new video launch price is $10
+PASS existing video development launch price is $7
+PASS combined new + existing video launch price is $15
+PASS package package_start item profile_creation exists
+PASS package package_start item topic_trial_opening exists
+PASS package package_start item topic_level_diagnosis exists
+PASS package package_start item topic_trial_close exists
+PASS package package_refresh item profile_development exists
+PASS package package_refresh item video_development exists
+PASS package package_refresh item topic_profile_audit exists
+PASS package package_refresh item topic_positioning_niche exists
+PASS package package_refresh item topic_search_terms exists
+PASS package package_teaching item topic_learning_outcome exists
+PASS package package_teaching item topic_lesson_flow exists
+PASS package package_teaching item topic_activity_check exists
+PASS package package_teaching item topic_quick_checks exists
+PASS package package_teaching item topic_homework_progress exists
+PASS package package_visibility item video_creation exists
+PASS package package_visibility item topic_brand_message exists
+PASS package package_visibility item topic_referrals_communities exists
+PASS package package_visibility item topic_landing_tracking exists
+PASS package package_growth item profile_development exists
+PASS package package_growth item topic_profile_audit exists
+PASS package package_growth item topic_trial_opening exists
+PASS package package_growth item topic_growth_goals exists
+PASS package package_growth item topic_first_contact exists
+PASS guide service recommendation profile_development exists
+PASS guide topic recommendation topic_profile_audit exists
+PASS guide topic recommendation topic_positioning_niche exists
+PASS guide topic recommendation topic_search_terms exists
+PASS guide package recommendation package_refresh exists
+PASS guide service recommendation profile_creation exists
+PASS guide topic recommendation topic_platform_models exists
+PASS guide topic recommendation topic_platform_requirements exists
+PASS guide topic recommendation topic_trial_opening exists
+PASS guide package recommendation package_start exists
+PASS guide service recommendation video_creation exists
+PASS guide topic recommendation topic_brand_message exists
+PASS guide topic recommendation topic_content_plan exists
+PASS guide package recommendation package_visibility exists
+PASS guide topic recommendation topic_learning_outcome exists
+PASS guide topic recommendation topic_trial_opening exists
+PASS guide topic recommendation topic_distraction_connection exists
+PASS guide topic recommendation topic_quick_checks exists
+PASS guide package recommendation package_teaching exists
+PASS guide service recommendation video_creation exists
+PASS guide topic recommendation topic_referrals_communities exists
+PASS guide topic recommendation topic_linkedin_presence exists
+PASS guide topic recommendation topic_landing_tracking exists
+PASS guide package recommendation package_visibility exists
+PASS guide service recommendation profile_creation exists
+PASS guide topic recommendation topic_platform_models exists
+PASS guide topic recommendation topic_platform_requirements exists
+PASS guide topic recommendation topic_platform_test exists
+PASS guide package recommendation package_start exists
+PASS main JavaScript passes node --check
+PASS content data JavaScript passes node --check
+PASS HTML IDs are unique
+PASS all required single-ID selectors exist
+PASS all local asset references exist
+PASS local Khutwa logo asset exists and is non-empty
+PASS local Khutwa banner asset exists and is non-empty
+PASS logo and banner fallback hooks are present
+PASS CSS image fallback states are defined
+PASS guide limitations are disclosed in the page
+PASS request form does not claim delivery when Forms is not connected
+PASS no obvious fabricated public proof metrics in page source
+PASS all basket recommendation IDs exist
+PASS Google Forms config contains all route keys
+INFO Google Forms links and entry IDs still require setup in the owner account
+INFO GA4 is intentionally disabled until Khutwa supplies a measurement ID
+PASS offline content editor inline JavaScript syntax is valid
+
+ALL STATIC CHECKS PASSED (82)

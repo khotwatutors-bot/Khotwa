@@ -1,0 +1,3 @@
+Khutwa MVP v4.0
+Build status: Local development preview; not deployed.
+Last packaged: 2026-11-13
