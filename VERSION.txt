@@ -1,3 +1,2 @@
-Khutwa Operations v0.5
-Build status: full-stack operational upgrade package (requires D1 setup and deployment).
-Prepared: 2026-11-14
+Khutwa Pages Operations v0.6
+Target: Cloudflare Pages with Pages Functions + D1
