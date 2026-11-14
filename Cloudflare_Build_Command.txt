@@ -1,0 +1,6 @@
+ارفع ملف Khutwa_Operations_Upgrade_v0_5.zip إلى جذر مستودع GitHub، ثم استخدم أمر البناء التالي بعد استبدال PASTE_D1_DATABASE_ID_HERE بمعرف D1 الحقيقي:
+
+unzip -o Khutwa_Operations_Upgrade_v0_5.zip -d . && mkdir -p site/assets/css site/assets/js site/admin && cp index.html site/index.html && cp styles.css site/assets/css/styles.css && cp content.js site/assets/content.js && cp app.js site/assets/js/app.js && cp admin.html site/admin/index.html && cp khutwa-brand-banner.jpg khutwa-mark.jpg site/assets/ && printf '%s\n' '{"name":"khotwa","main":"./worker.js","compatibility_date":"2026-11-14","assets":{"directory":"./site","binding":"ASSETS","run_worker_first":["/api/*"]},"d1_databases":[{"binding":"DB","database_name":"khutwa-production","database_id":"PASTE_D1_DATABASE_ID_HERE"}]}' > wrangler.jsonc
+
+Deploy command: npx wrangler deploy
+Preview command: اتركه فارغًا مؤقتًا.

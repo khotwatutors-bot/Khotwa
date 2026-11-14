@@ -8,6 +8,9 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const STORAGE_KEY = 'khutwa_v4_basket';
+  const ANALYTICS_CONSENT_KEY = 'khutwa_analytics_consent';
+  const VISITOR_KEY = 'khutwa_visitor_id';
+  let requestStartedTracked = false;
   let language = 'ar';
   let activeTopicFilter = 'all';
   let activePortfolioTab = 'videos';
@@ -223,12 +226,14 @@
       showToast(language==='ar'?'الخدمة موجودة بالفعل في السلة.':'This service is already in your basket.'); return;
     }
     basket.push({type,id,...extra});
+    trackEvent('add_to_cart',{item_id:`${type}:${id}`});
     renderBasket();
     showToast(language==='ar'?'تمت الإضافة إلى سلتك.':'Added to your basket.');
   }
   function addPath(pathId) {
     const path = DATA.paths.find(item=>item.id===pathId); if(!path) return;
     path.topics.forEach(topic=>{ if(!basket.some(item=>item.type==='topic'&&item.id===topic.id)) basket.push({type:'topic',id:topic.id}); });
+    trackEvent('add_to_cart',{item_id:`path:${pathId}`});
     renderBasket();
     showToast(language==='ar'?'تمت إضافة موضوعات المسار إلى السلة.':'Path topics added to basket.');
   }
@@ -239,6 +244,7 @@
       else if(getTopic(id)) { if(!basket.some(item=>item.type==='topic'&&item.id===id)) basket.push({type:'topic',id}); }
     });
     if(!basket.some(item=>item.type==='package'&&item.id===pkg.id)) basket.push({type:'package',id:pkg.id,title:pkg.title,qty:1});
+    trackEvent('add_to_cart',{item_id:`package:${packageId}`});
     renderBasket();
     showToast(language==='ar'?'أضفنا مكونات التجميعة. اسأل عن عرض الباقة.':'Combination added. Ask about your package offer.');
     $('#cartPanel').scrollIntoView({behavior:'smooth',block:'center'});
@@ -309,20 +315,6 @@
     }).join('');
   }
 
-  // Google Forms prefill: field IDs are configured by the owner after creating the actual form.
-  function selectedFormKey() {
-    const ids=basket.filter(x=>x.type==='service').map(x=>x.id);
-    const hasTopics=basket.some(x=>['topic','custom'].includes(x.type));
-    if(basket.length>1) return 'multiService';
-    if(ids.includes('profile_creation')) return 'profileCreation';
-    if(ids.includes('profile_development')) return 'profileDevelopment';
-    if(ids.includes('video_creation') || ids.includes('video_bundle')) return 'videoCreation';
-    if(ids.includes('video_development')) return 'videoDevelopment';
-    if(ids.includes('market_review')) return 'marketReview';
-    if(ids.includes('campaign_review')) return 'promotion';
-    if(hasTopics) return 'topicSession';
-    return 'general';
-  }
   function collectRequest() {
     const form=$('#requestForm');
     const fields=Object.fromEntries(new FormData(form).entries());
@@ -332,87 +324,42 @@
     });
     return {
       schema:'khutwa-request-v1',createdAt:new Date().toISOString(),language,
-      customer:{name:fields.name||'',whatsapp:fields.whatsapp||'',email:fields.email||'',country:fields.country||'',subject:fields.subject||'',experience:fields.experience||''},
+      customer:{name:fields.name||'',whatsapp:fields.whatsapp||'',email:fields.email||'',country:fields.country||'',subject:fields.subject||'',experience:fields.experience||'',preferredContact:fields.preferredContact||''},
       platforms:{current:fields.currentPlatform||'',target:fields.targetPlatform||'',profileLink:fields.profileLink||''},
       video:{type:fields.videoType||'',platform:fields.videoPlatform||'',duration:fields.videoDuration||'',footage:fields.footage||''},
       market:{country:fields.marketCountry||'',learnerLanguage:fields.marketLearnerLanguage||''},
       promotion:{budget:fields.campaignBudget||'',channels:fields.preferredChannel||''},
       selectedItems:selection,selectedTopics:selection.filter(x=>x.type==='topic').map(x=>x.label),
       customTopics:fields.customTopics||basket.filter(x=>x.type==='custom').map(x=>x.text).join('\n'),
-      goal:fields.goal||'',consent:$('#requestConsent').checked
+      goal:fields.goal||'',consent:$('#requestConsent').checked,website:fields.website||''
     };
   }
-  function requestSummary(request) {
-    const isAr=language==='ar';
-    const lines=[isAr?'طلب خدمة جديد إلى خُطوة':'New service request to Khutwa',
-      `${isAr?'الاسم':'Name'}: ${request.customer.name}`,
-      `${isAr?'واتساب':'WhatsApp'}: ${request.customer.whatsapp}`,
-      `${isAr?'البريد':'Email'}: ${request.customer.email||'-'}`,
-      `${isAr?'الدولة':'Country'}: ${request.customer.country}`,
-      `${isAr?'التخصص':'Subject'}: ${request.customer.subject}`,
-      `${isAr?'المنصة الحالية':'Current platform'}: ${request.platforms.current||'-'}`,
-      `${isAr?'المنصة المستهدفة':'Target platform'}: ${request.platforms.target||'-'}`,
-      `${isAr?'الاختيارات':'Selections'}:`,
-      ...request.selectedItems.map((item,i)=>`${i+1}. ${item.label} — ${item.price==null?(isAr?'عرض سعر':'Quote'):'$'+item.price}`),
-      `${isAr?'نوع الفيديو':'Video type'}: ${request.video.type||'-'}`,
-      `${isAr?'رابط البروفايل':'Profile link'}: ${request.platforms.profileLink||'-'}`,
-      `${isAr?'الموضوعات المخصصة':'Custom topics'}: ${request.customTopics||'-'}`,
-      `${isAr?'الاحتياج':'Goal'}: ${request.goal}`,
-      `${isAr?'تاريخ تجهيز الملخص':'Summary generated'}: ${new Date(request.createdAt).toLocaleString(isAr?'ar-EG':'en-US')}`
-    ];
-    return lines.join('\n');
-  }
-  function downloadRequest() {
-    if(!lastRequest) {
-      if(!$('#requestForm').reportValidity()) return;
-      if(!basket.length) { showToast(language==='ar'?'أضف خدمة أو موضوعًا إلى السلة أولًا.':'Add a service or topic to the basket first.'); return; }
-      lastRequest=collectRequest();
-    }
-    const blob=new Blob([JSON.stringify(lastRequest,null,2)],{type:'application/json;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=`Khutwa_Request_${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-    showToast(language==='ar'?'تم حفظ ملخص الطلب على جهازك فقط. لم يُرسل إلى خُطوة.':'Request summary saved to your device only. It has not been sent to Khutwa.');
-  }
-  function prefilledFormUrl(request, formKey) {
-    const forms=DATA.integrations.googleForms||{};
-    const hasSpecificForm=!!forms[formKey];
-    const formUrl=hasSpecificForm?forms[formKey]:(forms.general||'');
-    if(!formUrl) return null;
-    let url;
-    try { url=new URL(formUrl); } catch { return null; }
-    const entryMaps=forms.prefillEntries||{};
-    const map=hasSpecificForm?(entryMaps[formKey]||{}):(entryMaps.general||{});
-    const values={
-      name:request.customer.name,whatsapp:request.customer.whatsapp,email:request.customer.email,country:request.customer.country,
-      subject:request.customer.subject,experience:request.customer.experience,currentPlatform:request.platforms.current,targetPlatform:request.platforms.target,
-      profileLink:request.platforms.profileLink,selectedItems:request.selectedItems.map(x=>x.label).join(' | '),videoType:request.video.type,
-      videoPlatform:request.video.platform,videoDuration:request.video.duration,footage:request.video.footage,
-      promotion:request.promotion.channels,marketCountry:request.market.country,marketLearnerLanguage:request.market.learnerLanguage,
-      customTopics:request.customTopics,goal:request.goal,campaignBudget:request.promotion.budget,preferredChannel:request.promotion.channels,consent:request.consent?'Yes':'No'
-    };
-    let mapped=0;
-    Object.entries(values).forEach(([key,value])=>{
-      const fieldId=map[key];
-      if(fieldId && String(value||'').trim()) { url.searchParams.set(`entry.${fieldId}`,String(value)); mapped++; }
-    });
-    if(mapped<3) return null;
-    return url.toString();
-  }
-  function submitRequest(event) {
+  async function submitRequest(event) {
     event.preventDefault();
     const form=$('#requestForm');
     if(!form.reportValidity()) return;
     if(!basket.length) { setText('#formStatus',language==='ar'?'أضف خدمة واحدة على الأقل أو موضوعًا قبل إرسال الطلب.':'Add at least one service or topic before continuing.'); $('#cartPanel').scrollIntoView({behavior:'smooth'}); return; }
     lastRequest=collectRequest();
-    const formKey=selectedFormKey();
-    const target=prefilledFormUrl(lastRequest,formKey);
-    if(target) {
-      window.open(target,'_blank','noopener,noreferrer');
-      setText('#formStatus',language==='ar'?'فتحنا نموذج Google Forms مع بيانات طلبك المعبأة. راجع الإجابات واضغط إرسال داخل النموذج لإتمام الطلب.':'Google Forms opened with your request details prefilled. Review the answers and press Submit in the form to complete the request.');
-      trackEvent('request_form_opened',{form_type:formKey});
-    } else {
-      setText('#formStatus',language==='ar'?'نموذج Google Forms لم يُربط أو لم تُضبط معرّفات حقوله بعد. يمكنك حفظ ملخص الطلب الآن، ولن نعرض رسالة تفيد بأنه وصل إلى خُطوة.':'Google Forms is not connected or its field IDs are not configured yet. You can save the request summary; the site will not claim it reached Khutwa.');
-      $('#saveRequestCopy').focus();
+    let consent=false; try { consent=localStorage.getItem(ANALYTICS_CONSENT_KEY)==='accepted'; } catch {}
+    lastRequest.analytics = consent ? {consent:true, visitorId:getVisitorId()} : {consent:false};
+    const submitButton=form.querySelector('button[type="submit"]');
+    if(submitButton){submitButton.disabled=true;submitButton.dataset.originalText=submitButton.textContent;submitButton.textContent=language==='ar'?'جارٍ إرسال الطلب وحفظه…':'Sending and saving your request…';}
+    setText('#formStatus',language==='ar'?'جارٍ إرسال الطلب إلى نظام خُطوة المركزي…':'Sending your request to Khutwa…');
+    try {
+      const response=await fetch('/api/requests',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(lastRequest),credentials:'same-origin',cache:'no-store'});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok || !result.ok || !result.requestId) throw new Error(result.error || (language==='ar'?'لم نتمكن من حفظ الطلب. حاول مرة أخرى.':'We could not save your request. Please try again.'));
+      const requestId=result.requestId;
+      setText('#formStatus',language==='ar'?`تم استلام طلبك وحفظه في نظام خُطوة بنجاح. رقم طلبك: ${requestId}. سنراجع التفاصيل ونتواصل معك.`:`Your request has been received and saved securely. Request ID: ${requestId}. Khutwa will review it and contact you.`);
+      form.reset();
+      basket=[];
+      renderBasket();
+      lastRequest=null;
+      requestStartedTracked=false;
+    } catch(error) {
+      setText('#formStatus',language==='ar'?`تعذر إرسال الطلب: ${error.message} — لم نؤكد استلامه. حاول مرة أخرى أو تواصل معنا عبر واتساب.`:`Could not submit the request: ${error.message}. It has not been confirmed. Please try again or contact us on WhatsApp.`);
+    } finally {
+      if(submitButton){submitButton.disabled=false;submitButton.textContent=submitButton.dataset.originalText || (language==='ar'?'إرسال طلبك إلى خُطوة':'Submit your request to Khutwa');}
     }
   }
 
@@ -536,19 +483,41 @@
     recommendForText(clean);
   }
 
+  function getVisitorId() {
+    try {
+      let id=localStorage.getItem(VISITOR_KEY);
+      if(!id){id=crypto.randomUUID();localStorage.setItem(VISITOR_KEY,id);}
+      return id;
+    } catch { return crypto.randomUUID(); }
+  }
   function trackEvent(name, params={}) {
+    let analyticsChoice='declined';
+    try { analyticsChoice=localStorage.getItem(ANALYTICS_CONSENT_KEY)||'declined'; } catch {}
+    if(analyticsChoice!=='accepted') return;
+    const visitorId=getVisitorId();
+    const payload={name,visitorId,page:location.pathname+location.hash,itemId:params.item_id||''};
+    fetch('/api/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),credentials:'same-origin',keepalive:true}).catch(()=>{});
     if(typeof window.gtag==='function') window.gtag('event',name,params);
   }
-  function activateAnalytics() {
-    const id=DATA.integrations.googleAnalyticsId;
-    if(!id || !/^G-[A-Z0-9]+$/.test(id)) return;
-    const script=document.createElement('script');script.async=true;script.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;document.head.appendChild(script);
-    window.dataLayer=window.dataLayer||[];window.gtag=function(){window.dataLayer.push(arguments);};window.gtag('js',new Date());window.gtag('config',id,{anonymize_ip:true});
+  function initializeSiteAnalytics() {
+    let consent='declined'; try { consent=localStorage.getItem(ANALYTICS_CONSENT_KEY)||'unknown'; } catch {}
+    const banner=$('#analyticsConsent');
+    if(consent!=='accepted' && consent!=='declined' && banner) banner.hidden=false;
+    if(consent==='accepted') trackEvent('page_view',{page:location.pathname});
+    $('#acceptAnalytics')?.addEventListener('click',()=>{
+      try { localStorage.setItem(ANALYTICS_CONSENT_KEY,'accepted'); } catch {}
+      if(banner) banner.hidden=true;
+      trackEvent('page_view',{page:location.pathname});
+    });
+    $('#rejectAnalytics')?.addEventListener('click',()=>{
+      try { localStorage.setItem(ANALYTICS_CONSENT_KEY,'declined'); } catch {}
+      if(banner) banner.hidden=true;
+    });
   }
 
   document.addEventListener('click', event => {
-    const addService=event.target.closest('[data-add-service]'); if(addService){const duration=addService.closest('.service-card')?.querySelector('.consultation-duration')?.value||'30';addItem('service',addService.dataset.addService,{duration});trackEvent('add_to_cart',{item_id:addService.dataset.addService});return;}
-    const addTopic=event.target.closest('[data-add-topic]'); if(addTopic){addItem('topic',addTopic.dataset.addTopic);trackEvent('add_to_cart',{item_id:addTopic.dataset.addTopic});return;}
+    const addService=event.target.closest('[data-add-service]'); if(addService){const duration=addService.closest('.service-card')?.querySelector('.consultation-duration')?.value||'30';addItem('service',addService.dataset.addService,{duration});return;}
+    const addTopic=event.target.closest('[data-add-topic]'); if(addTopic){addItem('topic',addTopic.dataset.addTopic);return;}
     const addPathBtn=event.target.closest('[data-add-path]');if(addPathBtn){addPath(addPathBtn.dataset.addPath);return;}
     const addPackageBtn=event.target.closest('[data-add-package]');if(addPackageBtn){addPackage(addPackageBtn.dataset.addPackage);return;}
     const removeBtn=event.target.closest('[data-remove-item]');if(removeBtn){basket.splice(Number(removeBtn.dataset.removeItem),1);renderBasket();return;}
@@ -577,7 +546,7 @@
   $('#addCustomTopic').addEventListener('click',()=>{
     const text=$('#customTopic').value.trim();
     if(!text){showToast(language==='ar'?'اكتب الموضوع المطلوب أولًا.':'Describe the topic first.');$('#customTopic').focus();return;}
-    basket.push({type:'custom',id:`custom-${Date.now()}`,text});$('#customTopicsInForm').value=text;renderBasket();$('#customTopic').value='';showToast(language==='ar'?'تمت إضافة طلبك المخصص.':'Your custom topic request was added.');
+    basket.push({type:'custom',id:`custom-${Date.now()}`,text});trackEvent('add_to_cart',{item_id:'custom-topic'});$('#customTopicsInForm').value=text;renderBasket();$('#customTopic').value='';showToast(language==='ar'?'تمت إضافة طلبك المخصص.':'Your custom topic request was added.');
   });
   $('#runMarketSearch').addEventListener('click',buildSearchLinks);
   $('#requestMarketAnalysis').addEventListener('click',()=>{
@@ -587,7 +556,7 @@
     $('#request').scrollIntoView({behavior:'smooth'});
   });
   $('#requestForm').addEventListener('submit',submitRequest);
-  $('#saveRequestCopy').addEventListener('click',downloadRequest);
+  $('#requestForm').addEventListener('focusin',()=>{if(!requestStartedTracked){requestStartedTracked=true;trackEvent('request_started',{page:'/request'});}});
   $('#futureIdeaBtn').addEventListener('click',()=>{
     const text=language==='ar'?'مرحبًا خُطوة، أود مشاركة فكرة أو اقتراح للمساهمة في تشكيل مستقبل المنصة.':'Hello Khutwa, I would like to share an idea or suggestion to help shape the platform’s future.';
     window.open(`https://wa.me/${DATA.contact.whatsapp}?text=${encodeURIComponent(text)}`,'_blank','noopener,noreferrer');
@@ -596,7 +565,7 @@
   $('#guideClose').addEventListener('click',closeGuide);
   $$('[data-open-guide]').forEach(btn=>btn.addEventListener('click',openGuide));
   $('#guideForm').addEventListener('submit',event=>{event.preventDefault();const input=$('#guideInput');handleGuideInput(input.value);input.value='';});
-  activateAnalytics();
+  initializeSiteAnalytics();
   // Local image fallback keeps the brand visible even if a file was moved or renamed.
   $$('img[data-fallback="mark"]').forEach(img=>img.addEventListener('error',()=>img.closest('.brand-image-wrap')?.classList.add('image-failed'),{once:true}));
   $$('img[data-fallback="banner"]').forEach(img=>img.addEventListener('error',()=>img.closest('.hero-image-frame')?.classList.add('image-failed'),{once:true}));
