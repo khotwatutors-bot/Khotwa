@@ -1,7 +1,8 @@
 {
   "name": "khotwa",
-  "main": "./worker.js",
-  "compatibility_date": "2026-11-14",
+"main": "./worker.js",
+"keep_vars": true, 
+"compatibility_date": "2026-11-14",
   "assets": {
     "directory": "./site",
     "binding": "ASSETS",
