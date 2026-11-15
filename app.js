@@ -388,14 +388,7 @@
     advisorStarted=true;
     guideHistory=[];
     addGuideMessage(language==='ar'?'أهلًا بيك في خُطوة. أنا مساعد آلي، هسألك كام سؤال بسيط عشان أفهم وضعك وأقترح عليك الأنسب، والقرار في الآخر ليك. من فضلك متكتبش كلمات مرور أو بيانات حساسة. إيه أقرب حاجة لوضعك؟':'Welcome to Khutwa. I am an automated assistant: I will ask a few simple questions to understand your situation and suggest what fits best, and the decision stays yours. Please do not share passwords or sensitive data. Which option best describes your situation?');
-    quickChips([
-      {label:language==='ar'?'عايز أبدأ بروفايل':'I need a new profile',value:'أريد إنشاء بروفايل واختيار منصة مناسبة'},
-      {label:language==='ar'?'عندي بروفايل محتاج تطوير':'Improve my profile',value:'عندي بروفايل وأريد تطويره وتحسين ظهوره'},
-      {label:language==='ar'?'محتاج فيديو':'I need a video',value:'أحتاج إنشاء فيديو أو تطوير فيديو موجود'},
-      {label:language==='ar'?'أطور طريقة تدريسي':'Improve my teaching',value:'أريد تحسين الشرح والحصة التجريبية وإدارة الدرس'},
-      {label:language==='ar'?'أوصل لطلاب أكثر':'Reach more learners',value:'أريد الوصول إلى طلاب وعملاء محتملين أكثر'},
-      {label:language==='ar'?'مش عارف أبدأ منين':'Not sure where to start',value:'لا أعرف ما الخدمة المناسبة لي'}
-    ]);
+    flowStart();
   }
   function guideDirectAnswer(text) {
     const value=String(text||'').toLocaleLowerCase();
@@ -480,6 +473,256 @@
     addGuideMessage(language==='ar'?'تقدر تضيف خدمة أو موضوعًا أو تجميعة إلى السلة، وبعدها تكمل طلبًا واحدًا. الأسعار النهائية والعروض الخاصة يؤكدها فريق خُطوة قبل التنفيذ.':'Add a service, topic, or combination to your basket and submit one request. Final pricing and any special offer are confirmed by Khutwa before work begins.');
     quickChips([{label:language==='ar'?'عندي احتياج آخر':'Another need',value:'لدي احتياج آخر وأريد اقتراحًا مختلفًا'},{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'}]);
   }
+  /* ---------- Guided advisor (rules based, no external AI) ---------- */
+  const AI_ENABLED = false; // set to true only after the ANTHROPIC_API_KEY secret exists in Cloudflare
+  const FLOW_SITUATIONS = [
+    { id:'new', label:{ar:'عايز أبدأ كمدرس جديد',en:'I am starting as a new tutor'} },
+    { id:'profile', label:{ar:'عندي بروفايل ومحتاج أحسنه',en:'I have a profile to improve'} },
+    { id:'video', label:{ar:'محتاج فيديو',en:'I need a video'} },
+    { id:'reach', label:{ar:'عايز طلاب أكتر',en:'I want more learners'} },
+    { id:'teaching', label:{ar:'عايز أحسّن طريقة تدريسي',en:'I want to improve my teaching'} },
+    { id:'notsure', label:{ar:'مش عارف أبدأ منين',en:'I am not sure where to start'} }
+  ];
+  const FLOW_OBSTACLES = {
+    new: [
+      { id:'platform', label:{ar:'مش عارف أختار منصة',en:'I cannot choose a platform'} },
+      { id:'build', label:{ar:'مش عارف أبني بروفايلي',en:'I do not know how to build my profile'} },
+      { id:'trial', label:{ar:'قلقان من الحصة التجريبية',en:'I am worried about the trial lesson'} }
+    ],
+    profile: [
+      { id:'search', label:{ar:'مش بيظهر في البحث',en:'It does not show up in search'} },
+      { id:'position', label:{ar:'تخصصي مش واضح للطالب',en:'My niche is not clear to learners'} },
+      { id:'price', label:{ar:'مش متأكد من السعر',en:'I am unsure about my price'} }
+    ],
+    video: [
+      { id:'vnew', label:{ar:'معنديش فيديو',en:'I do not have a video'} },
+      { id:'vdev', label:{ar:'عندي فيديو ومش راضي عنه',en:'I have a video I am not happy with'} },
+      { id:'vmsg', label:{ar:'مش عارف أقول إيه فيه',en:'I do not know what to say in it'} }
+    ],
+    reach: [
+      { id:'external', label:{ar:'عايز طلاب من خارج المنصة',en:'I want learners outside the platform'} },
+      { id:'brand', label:{ar:'عايز أبني اسم ومحتوى',en:'I want to build a name and content'} },
+      { id:'campaign', label:{ar:'عندي أو ناوي أعمل حملة إعلانية',en:'I have or plan an ad campaign'} }
+    ],
+    teaching: [
+      { id:'trial2', label:{ar:'الحصة التجريبية',en:'The trial lesson'} },
+      { id:'levels', label:{ar:'مستويات مختلفة وإدارة الفصل',en:'Mixed levels and class management'} },
+      { id:'assess', label:{ar:'التقييم والمتابعة',en:'Assessment and follow-up'} }
+    ]
+  };
+  const FLOW_OUTCOMES = {
+    'new.platform': { s:['market_review'], t:['topic_platform_models','topic_platform_requirements','topic_platform_test'], p:'package_start',
+      why:{ar:'اختيار منصة غلط بيضيّع وقت وعمولة، فالأفضل تقارن الخيارات قبل ما تلتزم.',en:'A wrong platform choice wastes time and commission, so compare options before committing.'},
+      res:{ar:'مقارنة واضحة بين خيارات مناسبة لتخصصك وخطة اختبار عملية قبل القرار.',en:'A clear comparison of options that suit your subject and a practical test plan before you decide.'} },
+    'new.build': { s:['profile_creation'], t:['topic_platform_requirements','topic_positioning_niche','topic_trial_opening'], p:'package_start',
+      why:{ar:'البداية المنظمة بتوفر عليك تجربة وغلط، وأول انطباع للطالب بيبدأ من البروفايل.',en:'An organised start saves trial and error, and a learner’s first impression starts with your profile.'},
+      res:{ar:'بروفايل مكتوب ومرتب (عنوان ونبذة وخبرات وتخصصات) وجاهز للنشر.',en:'A written, organised profile (headline, bio, experience, subjects) ready to publish.'} },
+    'new.trial': { s:[], t:['topic_trial_opening','topic_level_diagnosis','topic_trial_close'], p:null,
+      why:{ar:'الحصة التجريبية هي أول لقاء، ومعرفة تفتح الحوار وتشخّص المستوى وتختم بخطوة واضحة بتفرق.',en:'The trial lesson is the first meeting; opening well, diagnosing level and closing with a clear next step matters.'},
+      res:{ar:'خطة جاهزة للدقائق الأولى والتشخيص والختام، تقدر تطبقها في أول حصة.',en:'A ready plan for the opening, diagnosis and close that you can use in your first lesson.'} },
+    'profile.search': { s:['profile_development'], t:['topic_search_terms','topic_profile_completeness','topic_platform_activity'], p:'package_refresh',
+      why:{ar:'الظهور في البحث بيتأثر باكتمال الملف وبالكلمات اللي الطالب بيبحث بيها.',en:'Search visibility is affected by profile completeness and the words learners search with.'},
+      res:{ar:'ملف أكمل وأوضح وكلمات أنسب لتخصصك. الظهور الفعلي بيتأثر كمان بقرارات المنصة والمنافسة.',en:'A more complete, clearer profile with better keywords. Actual visibility also depends on platform decisions and competition.'} },
+    'profile.position': { s:['profile_development'], t:['topic_positioning_niche','topic_profile_audit','topic_improvement_priorities'], p:'package_refresh',
+      why:{ar:'لما التخصص مش واضح، الطالب مش بيعرف ليه يختارك أنت.',en:'When your niche is unclear, learners do not know why they should choose you.'},
+      res:{ar:'تخصص فرعي وقيمة مميزة مكتوبين بوضوح، مع ترتيب أولويات التحسين.',en:'A clearly written niche and value, with ordered improvement priorities.'} },
+    'profile.price': { s:['individual_consultation'], t:['topic_price_competition','topic_net_income','topic_lesson_packages'], p:null,
+      why:{ar:'التسعير محتاج حسبة صافي بعد العمولات ومقارنة بالمنافسين، مش تخمين.',en:'Pricing needs a net-income calculation after commission and a look at competitors, not guessing.'},
+      res:{ar:'سعر مبني على حسابك وسوقك، وحزم دروس واضحة.',en:'A price based on your numbers and market, with clear lesson packages.'} },
+    'video.vnew': { s:['video_creation'], t:['topic_brand_message','topic_content_plan'], p:'package_visibility',
+      why:{ar:'الفيديو الأقوى هو اللي ليه رسالة وجمهور واضحين، مش مونتاج حلو بس.',en:'The strongest video has a clear message and audience, not just nice editing.'},
+      res:{ar:'فيديو جديد مبني على رسالتك المهنية، حسب النوع اللي تختاره.',en:'A new video built on your professional message, in the type you choose.'} },
+    'video.vdev': { s:['video_development'], t:['topic_brand_message','topic_portfolio_selection'], p:'package_refresh',
+      why:{ar:'تحسين فيديو موجود ممكن يوفر عليك البدء من الصفر.',en:'Improving an existing video can save you starting from scratch.'},
+      res:{ar:'نسخة محسّنة من الفيديو وموحّدة مع رسالتك المهنية.',en:'An improved version of the video aligned with your professional message.'} },
+    'video.vmsg': { s:['video_creation'], t:['topic_brand_message','topic_portfolio_selection','topic_content_plan'], p:null,
+      why:{ar:'قبل التصوير لازم نحدد هتقول إيه ولمين، وده بيوفر وقت وتعديلات.',en:'Before filming you need to decide what to say and to whom, which saves time and rework.'},
+      res:{ar:'رسالة وجمهور ونبرة واضحة قبل ما تصوّر أو تعدّل.',en:'A clear message, audience and tone before you film or edit.'} },
+    'reach.external': { s:[], t:['topic_referrals_communities','topic_linkedin_presence','topic_landing_tracking'], p:'package_visibility',
+      why:{ar:'الوصول خارج المنصة محتاج مكان واضح يوصّل الطالب ويتابع الاستفسارات.',en:'Reaching learners outside a platform needs a clear place that leads them to you and tracks enquiries.'},
+      res:{ar:'خطة وصول عملية وتتبع بسيط للاستفسارات، من غير وعد بعدد طلاب.',en:'A practical outreach plan and simple enquiry tracking, with no promise of learner numbers.'} },
+    'reach.brand': { s:['video_creation'], t:['topic_brand_message','topic_portfolio_selection','topic_content_plan'], p:'package_visibility',
+      why:{ar:'الاسم المهني بيتبني برسالة واضحة وأعمال مختارة بعناية.',en:'A professional name is built with a clear message and carefully chosen work.'},
+      res:{ar:'رسالة ونبرة مهنية وأعمال مرتبة وخطة محتوى.',en:'A professional message and tone, organised work samples and a content plan.'} },
+    'reach.campaign': { s:['campaign_review'], t:['topic_landing_tracking','topic_brand_message'], p:null,
+      why:{ar:'قبل ما تصرف على إعلان لازم المسار من الإعلان للاستفسار يكون واضح.',en:'Before spending on ads, the path from ad to enquiry should be clear.'},
+      res:{ar:'مراجعة حملتك وتنظيمها بخطوات وتتبع. السعر بيتحدد بعد المراجعة.',en:'A review and structure for your campaign with tracking. Pricing is set after the review.'} },
+    'teaching.trial2': { s:[], t:['topic_trial_opening','topic_level_diagnosis','topic_trial_close'], p:'package_teaching',
+      why:{ar:'تحسين الحصة التجريبية بيأثر على انطباع الطالب وقراره.',en:'A better trial lesson shapes the learner’s impression and decision.'},
+      res:{ar:'نموذج تطبقه في أول دقيقة، وتشخيص مرتب، وختام بخطوة تالية.',en:'A model you can apply from the first minute, an orderly diagnosis and a close with a next step.'} },
+    'teaching.levels': { s:[], t:['topic_level_mapping','topic_scaffolding','topic_individual_differences'], p:'package_teaching',
+      why:{ar:'التعامل مع المستويات المختلفة بيخلي الشرح يناسب كل طالب.',en:'Handling mixed levels makes your teaching fit each learner.'},
+      res:{ar:'طرق عملية لتمييز المستوى وتبسيط المهام ومراعاة الفروق.',en:'Practical ways to identify level, simplify tasks and respect individual differences.'} },
+    'teaching.assess': { s:[], t:['topic_quick_checks','topic_correct_errors','topic_homework_progress'], p:'package_teaching',
+      why:{ar:'التقييم الصح بيوضح التقدم ويحافظ على دافعية الطالب.',en:'Good assessment shows progress and keeps the learner motivated.'},
+      res:{ar:'أسئلة تحقق قصيرة وتصحيح بدون إحباط ومتابعة واضحة للتقدم.',en:'Short checks, correction without discouragement and clear progress tracking.'} },
+    'notsure.main': { s:['individual_consultation'], t:['topic_situation_diagnosis','topic_growth_goals'], p:'package_growth', sm:{ s:['individual_consultation'], t:[] },
+      why:{ar:'لو مش واضح تبدأ منين، أفضل بداية إن حد يسمعك ويرتب الأولويات معاك.',en:'If you are not sure where to start, the best first step is someone listening and ordering priorities with you.'},
+      res:{ar:'خطة بخطوات وأولويات واضحة، وبعدها تعرف أنهي خدمة محتاجها فعلًا.',en:'A plan with clear steps and priorities, so you know which service you actually need.'} }
+  };
+  let guideFlow = { sit:null, obs:null };
+  function flowLabel(list, id) { const found=list.find(x=>x.id===id); return found?t(found.label):''; }
+  function flowStart() {
+    guideFlow={sit:null,obs:null};
+    quickChips(FLOW_SITUATIONS.map(x=>({label:t(x.label),value:`flow:s:${x.id}`})));
+  }
+  function flowAsk(kind, withRestart) {
+    if(kind==='obs') {
+      addGuideMessage(language==='ar'?'تمام. إيه أكبر حاجة مضايقاك في ده؟':'Got it. What is the biggest obstacle for you here?');
+      quickChips(FLOW_OBSTACLES[guideFlow.sit].map(x=>({label:t(x.label),value:`flow:o:${x.id}`})));
+    } else {
+      addGuideMessage(language==='ar'?'وتحب تبدأ إزاي؟':'How would you like to start?');
+      const chips=[
+        {label:language==='ar'?'خطوة صغيرة أجرّب بيها':'A small first step',value:'flow:z:small'},
+        {label:language==='ar'?'حل كامل لمشكلتي':'A complete solution',value:'flow:z:full'},
+        {label:language==='ar'?'أتكلم مع حد الأول':'Talk to someone first',value:'flow:z:talk'}
+      ];
+      if(withRestart) chips.push({label:language==='ar'?'مش ده قصدي':'Not what I meant',value:'flow:restart'});
+      quickChips(chips);
+    }
+  }
+  function flowWhatsAppLink(topicText) {
+    const number=String(DATA.contact?.whatsapp||'').replace(/\D/g,'');
+    if(!number) return '';
+    const msg=language==='ar'?`أهلًا خُطوة، محتاج أسأل عن: ${topicText}`:`Hello Khutwa, I would like to ask about: ${topicText}`;
+    return `<a class="guide-chip" style="display:inline-block;margin-top:8px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${number}?text=${encodeURIComponent(msg)}">${language==='ar'?'كلّم خُطوة على واتساب':'Message Khutwa on WhatsApp'}</a>`;
+  }
+  /* ---------- Free-text understanding (rules based, Arabic-aware) ---------- */
+  function normText(value) {
+    return String(value||'').toLowerCase()
+      .replace(/[\u064B-\u065F\u0670\u0640]/g,'')
+      .replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+      .replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();
+  }
+  const FLOW_KEYWORDS = {
+    'new.platform': ['منصه','اي منصه','انهي منصه','اختار منصه','اختيار منصه','مقارنه المنصات','قارن المنصات','بريبلي ولا','which platform','choose a platform','compare platforms','best platform','what platform'],
+    'new.build': ['ابني بروفايل','اعمل بروفايل','انشاء بروفايل','اكتب بروفايل','بروفايل جديد','اول بروفايل','معنديش بروفايل','مفيش عندي بروفايل','create a profile','build my profile','new profile','no profile','write my profile'],
+    'new.trial': ['خايف من الحصه','قلقان من الحصه','اول حصه','اول حصه تجريبيه','نفسي في حصه تجريبيه','first lesson','nervous about the trial'],
+    'profile.search': ['مش بيظهر','ما بيظهرش','مش بظهر','ظهور','نتايج البحث','نتائج البحث','ترتيب','الكلمات المفتاحيه','ما حدش بيلاقيني','search results','not showing','visibility','ranking','keywords','cannot be found'],
+    'profile.position': ['تخصص','تخصصي','نيش','مش واضح','اتميز','اميز نفسي','مميز','بروفايلي ضعيف','بروفايل ضعيف','مش جايب طلاب','حجوزات قليله','niche','stand out','weak profile','positioning','no bookings'],
+    'profile.price': ['سعر','اسعر','تسعير','السعر','اغلي','ارخص','سعر الساعه','pricing','price','rate','hourly','how much to charge','how much should','per hour','an hour','charge'],
+    'video.vnew': ['عايز فيديو','محتاج فيديو','معنديش فيديو','اعمل فيديو','فيديو تعريفي','فيديو ترويجي','make a video','need a video','intro video','promo video','no video'],
+    'video.vdev': ['فيديو قديم','عندي فيديو','فيديو موجود','مش راضي عن الفيديو','تطوير الفيديو','تحسين الفيديو','improve my video','existing video','my video is','edit my video'],
+    'video.vmsg': ['اقول ايه','مش عارف اقول','فكره الفيديو','سكربت','نص الفيديو','اتكلم عن ايه','what to say','script','what should i say'],
+    'reach.external': ['خارج المنصه','من برا المنصه','طلاب من برا','لينكدان','لينكد','linkedin','فيسبوك','facebook','جروبات','مجتمعات','outside the platform','outside platform','social media','communities'],
+    'reach.brand': ['براند','personal brand','محتوي','صناعه المحتوي','ريلز','يوتيوب','youtube','انستجرام','instagram','تيك توك','tiktok','content','اسم مهني','build a name'],
+    'reach.campaign': ['حمله','حمله اعلانيه','اعلان','اعلانات','ممول','ممولين','ads','advertising','campaign','sponsored','promote'],
+    'teaching.trial2': ['تحسين الحصه التجريبيه','افتتاح الحصه','بدايه الحصه','تحسين حصتي التجريبيه','improve my trial','open the lesson'],
+    'teaching.levels': ['مستويات','مستوي مختلف','طلاب مختلفين','ادارة الفصل','ادراه الفصل','مجموعه','فصل','مشتتين','تشتت','mixed levels','class management','different levels','group class','distracted'],
+    'teaching.assess': ['تقييم','اختبار','واجب','متابعه','تصحيح','اخطاء','اصحح','assessment','homework','feedback','correct','progress','test'],
+    'notsure.main': ['مش عارف ابدا','مش عارف ابدا منين','مش عارف','تايه','محتار','ساعدني','ابدا منين','حاسس ان في مشكله','not sure','where to start','confused','lost','help me','i do not know']
+  };
+  const FLOW_SIT_HINTS = {
+    new: ['جديد','مدرس جديد','مدرسه جديده','ابدا','بدايه','مبتدا','new tutor','beginner','starting','just started'],
+    profile: ['بروفايل','ملفي','حسابي','profile','account'],
+    video: ['فيديو','تصوير','مونتاج','video','filming'],
+    reach: ['طلاب اكتر','طلاب جدد','عملاء','حجوزات','تسويق','students','more learners','bookings','marketing','clients'],
+    teaching: ['تدريس','شرح','حصه','حصص','درس','teaching','lesson','teach'],
+    notsure: []
+  };
+  const FLOW_KEYWORDS_NORM = Object.fromEntries(Object.entries(FLOW_KEYWORDS).map(([k,v])=>[k,v.map(normText)]));
+  const FLOW_SIT_NORM = Object.fromEntries(Object.entries(FLOW_SIT_HINTS).map(([k,v])=>[k,v.map(normText)]));
+  function termScore(text, term) {
+    if(!term) return 0;
+    const padded=` ${text} `;
+    const hit = term.length<=3 ? padded.includes(` ${term} `) : padded.includes(term);
+    if(!hit) return 0;
+    return term.includes(' ') ? 3 : 2;
+  }
+  function understandFreeText(raw) {
+    const text=normText(raw); if(text.length<3) return false;
+    const outcome={}; const sit={};
+    Object.entries(FLOW_KEYWORDS_NORM).forEach(([key,terms])=>{
+      const score=terms.reduce((sum,term)=>sum+termScore(text,term),0);
+      if(score>0) { outcome[key]=score; const s=key.split('.')[0]; sit[s]=(sit[s]||0)+score; }
+    });
+    Object.entries(FLOW_SIT_NORM).forEach(([s,terms])=>{
+      const score=terms.reduce((sum,term)=>sum+termScore(text,term),0);
+      if(score>0) sit[s]=(sit[s]||0)+Math.min(score,3);
+    });
+    const hint={};
+    Object.entries(FLOW_SIT_NORM).forEach(([s,terms])=>{ hint[s]=Math.min(2,terms.reduce((sum,term)=>sum+termScore(text,term),0)); });
+    const boosted=Object.fromEntries(Object.entries(outcome).map(([key,score])=>[key,score+(hint[key.split('.')[0]]||0)]));
+    const ranked=Object.entries(boosted).sort((a,b)=>b[1]-a[1]);
+    const ackPrefix=language==='ar'?'فهمت إنك':'I understood that you';
+    if(ranked.length && ranked[0][1]>=4 && (!ranked[1] || ranked[0][1]>=ranked[1][1]+1)) {
+      const [s,o]=ranked[0][0].split('.');
+      guideFlow={sit:s,obs:s==='notsure'?null:o};
+      const label=s==='notsure'?flowLabel(FLOW_SITUATIONS,'notsure'):`${flowLabel(FLOW_SITUATIONS,s)} — ${flowLabel(FLOW_OBSTACLES[s]||[],o)}`;
+      addGuideMessage(`${ackPrefix}: ${label}.${language==='ar'?' لو ده مش قصدك اضغط «مش ده قصدي».':' If that is not what you meant, tap “Not what I meant”.'}`);
+      flowAsk('size',true);
+      return true;
+    }
+    const bestSit=Object.entries(sit).sort((a,b)=>b[1]-a[1]);
+    if(bestSit.length && bestSit[0][1]>=2 && (!bestSit[1] || bestSit[0][1]>bestSit[1][1])) {
+      const s=bestSit[0][0];
+      guideFlow={sit:s,obs:null};
+      addGuideMessage(`${ackPrefix}: ${flowLabel(FLOW_SITUATIONS,s)}.`);
+      if(s==='notsure') flowAsk('size',true); else flowAsk('obs');
+      return true;
+    }
+    return false;
+  }
+  function unknownFreeText(text) {
+    addGuideMessage(language==='ar'
+      ? 'مش متأكد إني فهمت قصدك بالظبط. اختار الأقرب من اللي تحت، أو اكتب مشكلتك بجملة قصيرة فيها كلمة زي: بروفايل، فيديو، سعر، طلاب، منصة.'
+      : 'I am not sure I understood exactly. Pick the closest option below, or describe your problem in a short sentence with a word such as: profile, video, price, learners, platform.');
+    flowStart();
+    const host=document.createElement('div');host.className='guide-recommendations';
+    const custom=document.createElement('div');custom.className='guide-recommendation';
+    custom.innerHTML=`<b>${language==='ar'?'اطلب تركيبة خاصة':'Request a custom combination'}</b><p>${language==='ar'?'سنراجع احتياجك ونقترح الموضوعات والتكلفة قبل التأكيد.':'We will review your need and suggest relevant topics and pricing before confirmation.'}</p><button type="button" data-guide-custom="${escapeHTML(text)}">${language==='ar'?'أضف احتياجي إلى السلة':'Add my need to the basket'}</button>`;
+    host.appendChild(custom);$('#guideMessages').appendChild(host);$('#guideMessages').scrollTop=$('#guideMessages').scrollHeight;
+  }
+  function flowRecommend(size) {
+    const key=guideFlow.sit==='notsure'?'notsure.main':`${guideFlow.sit}.${guideFlow.obs}`;
+    const o=FLOW_OUTCOMES[key]; if(!o) { resetGuideWelcome(false); return; }
+    const situation=flowLabel(FLOW_SITUATIONS,guideFlow.sit);
+    const obstacle=guideFlow.sit==='notsure'?'':flowLabel(FLOW_OBSTACLES[guideFlow.sit]||[],guideFlow.obs);
+    const topicText=[situation,obstacle].filter(Boolean).join(' - ');
+    if(size==='talk') {
+      addGuideMessage(language==='ar'
+        ? 'تمام، الأفضل تتكلم مع فريق خُطوة الأول وتشرح موقفك. تقدر كمان تحجز جلسة توجيه فردية لو حابب يتم الكلام بشكل منظم.'
+        : 'Of course. Speak with the Khutwa team first and explain your situation. You can also add a one-to-one consultation for a structured conversation.',
+        'bot', flowWhatsAppLink(topicText));
+      renderGuideCards(['individual_consultation'],[],[]);
+      quickChips([{label:language==='ar'?'ابدأ من الأول':'Start over',value:'flow:restart'},{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'}]);
+      return;
+    }
+    const pick = size==='small' ? (o.sm || { s:[], t:o.t.slice(0,2) }) : { s:o.s, t:o.t };
+    const pkg = size==='small' ? [] : (o.p?[o.p]:[]);
+    let total=0, unpriced=false;
+    pick.s.forEach(id=>{ const s=getService(id); if(s && typeof s.price==='number') total+=s.price; else if(s) unpriced=true; });
+    total += pick.t.length*DATA.pricing.topicPrice;
+    const intro=language==='ar'
+      ? `من كلامك: ${situation}${obstacle?` — ${obstacle}`:''}.\n${size==='small'?'ابدأ بخطوة صغيرة، ولو استفدت كمّل بعدها. ':'دي الحزمة الأنسب لحالتك. '}السبب: ${t(o.why)}\nالمتوقع: ${t(o.res)}`
+      : `From what you said: ${situation}${obstacle?` — ${obstacle}`:''}.\n${size==='small'?'Start with a small step and continue if it helps. ':'This is the best fit for your case. '}Why: ${t(o.why)}\nExpected: ${t(o.res)}`;
+    addGuideMessage(intro);
+    renderGuideCards(pick.s,pick.t,pkg);
+    const priceLine=language==='ar'
+      ? `السعر التقريبي حسب الكتالوج: ${money(total)}${unpriced?' + تسعير يتحدد بعد المراجعة':''}. العرض النهائي بيتأكد من فريق خُطوة كتابةً قبل التنفيذ. خُطوة بتقدم شغل محدد قد يحسّن حضورك، لكن قرار الطلاب والمنصات مش مضمون.`
+      : `Approximate price from the catalog: ${money(total)}${unpriced?' + pricing confirmed after review':''}. The final offer is confirmed in writing by Khutwa before work starts. Khutwa delivers defined work that may improve your presence, but learner and platform decisions cannot be guaranteed.`;
+    addGuideMessage(priceLine);
+    quickChips([
+      {label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'},
+      {label:language==='ar'?'ابدأ من الأول':'Start over',value:'flow:restart'},
+      {label:language==='ar'?'عندي سؤال تاني':'I have another question',value:'flow:talk'}
+    ]);
+  }
+  function handleFlow(value) {
+    if(value==='flow:restart') { addGuideMessage(language==='ar'?'ابدأ من الأول':'Start over','user'); addGuideMessage(language==='ar'?'تمام. إيه أقرب حاجة لوضعك؟':'Sure. Which option best describes your situation?'); flowStart(); return; }
+    if(value==='flow:talk') { addGuideMessage(language==='ar'?'عندي سؤال تاني':'I have another question','user'); addGuideMessage(language==='ar'?'اكتب سؤالك هنا وهحاول أرد من معلومات خُطوة، ولو محتاج حد من الفريق كلّمنا على واتساب.':'Type your question here and I will answer from Khutwa information. If you need the team, message us on WhatsApp.','bot',flowWhatsAppLink(language==='ar'?'سؤال':'a question')); quickChips([{label:language==='ar'?'ابدأ من الأول':'Start over',value:'flow:restart'}]); return; }
+    const [, kind, id]=value.split(':');
+    if(kind==='s') {
+      addGuideMessage(flowLabel(FLOW_SITUATIONS,id),'user'); guideFlow={sit:id,obs:null};
+      if(id==='notsure') flowAsk('size'); else flowAsk('obs');
+    } else if(kind==='o') {
+      addGuideMessage(flowLabel(FLOW_OBSTACLES[guideFlow.sit]||[],id),'user'); guideFlow.obs=id; flowAsk('size');
+    } else if(kind==='z') {
+      const labels={small:language==='ar'?'خطوة صغيرة أجرّب بيها':'A small first step',full:language==='ar'?'حل كامل لمشكلتي':'A complete solution',talk:language==='ar'?'أتكلم مع حد الأول':'Talk to someone first'};
+      addGuideMessage(labels[id]||id,'user'); flowRecommend(id);
+    }
+  }
+  aiState.disabled = !AI_ENABLED;
   function renderGuideCards(serviceIds, topicIds, packageIds) {
     const services=(serviceIds||[]).map(getService).filter(Boolean);
     const topics=(topicIds||[]).map(getTopic).filter(Boolean);
@@ -505,6 +748,7 @@
     $('#guideMessages').appendChild(host);$('#guideMessages').scrollTop=$('#guideMessages').scrollHeight;
     return true;
   }
+  function fallbackAnswer(text) { if(!understandFreeText(text)) unknownFreeText(text); }
   async function askAssistant(text) {
     if(aiState.busy) return;
     aiState.busy=true;
@@ -518,7 +762,7 @@
       typing.remove();
       if(!res.ok || !data || !data.ok || !data.reply) {
         if(res.status===503) aiState.disabled=true;
-        recommendForText(text);
+        fallbackAnswer(text);
         return;
       }
       guideHistory.push({role:'assistant',content:String(data.reply).slice(0,600)});
@@ -529,7 +773,7 @@
       else if(shown) quickChips([{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'},{label:language==='ar'?'عندي احتياج آخر':'Another need',value:language==='ar'?'لدي احتياج آخر':'I have another need'}]);
     } catch {
       typing.remove();
-      recommendForText(text);
+      fallbackAnswer(text);
     } finally {
       clearTimeout(timer);
       aiState.busy=false;
@@ -538,11 +782,12 @@
   function handleGuideInput(text) {
     const clean=String(text||'').trim(); if(!clean) return;
     if(aiState.busy) return;
+    if(clean.startsWith('flow:')) { handleFlow(clean); return; }
     addGuideMessage(clean,'user');
     if(['افتح السلة','open basket','show basket','view basket'].includes(clean.toLocaleLowerCase())) { closeGuide();$('#cartPanel').scrollIntoView({behavior:'smooth',block:'center'});return; }
     guideHistory.push({role:'user',content:clean.slice(0,600)});
     if(guideDirectAnswer(clean.toLocaleLowerCase())) { guideHistory.push({role:'assistant',content:'(Answered with the official price and offer information.)'}); return; }
-    if(aiState.disabled) { recommendForText(clean); return; }
+    if(aiState.disabled) { if(!understandFreeText(clean)) unknownFreeText(clean); return; }
     askAssistant(clean);
   }
 
