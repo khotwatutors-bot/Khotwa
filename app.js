@@ -17,6 +17,8 @@
   let basket = loadBasket();
   let lastRequest = null;
   let advisorStarted = false;
+  let guideHistory = [];
+  const aiState = { disabled: false, busy: false };
 
   function t(value) {
     if (value && typeof value === 'object') return value[language] || value.ar || value.en || '';
@@ -366,6 +368,7 @@
   // Lightweight, local guided recommender. It does not call an AI API or send messages externally.
   function openGuide() {
     const panel=$('#guidePanel');
+    panel.style.zIndex='1100'; // keep the assistant above the cookie banner on small screens
     panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
     if(!advisorStarted) resetGuideWelcome(true);
     setTimeout(()=>$('#guideInput').focus(),80);
@@ -383,7 +386,8 @@
   function resetGuideWelcome(push=true) {
     if(push) $('#guideMessages').innerHTML='';
     advisorStarted=true;
-    addGuideMessage(language==='ar'?'أهلًا بيك في خُطوة. خلينا نفهم احتياجك ونقترح عليك خدمات أو موضوعات مناسبة. إيه أقرب حاجة لوضعك؟':'Welcome to Khutwa. Let’s understand your needs and suggest suitable services or topics. Which option best describes your situation?');
+    guideHistory=[];
+    addGuideMessage(language==='ar'?'أهلًا بيك في خُطوة. أنا مساعد آلي، هسألك كام سؤال بسيط عشان أفهم وضعك وأقترح عليك الأنسب، والقرار في الآخر ليك. من فضلك متكتبش كلمات مرور أو بيانات حساسة. إيه أقرب حاجة لوضعك؟':'Welcome to Khutwa. I am an automated assistant: I will ask a few simple questions to understand your situation and suggest what fits best, and the decision stays yours. Please do not share passwords or sensitive data. Which option best describes your situation?');
     quickChips([
       {label:language==='ar'?'عايز أبدأ بروفايل':'I need a new profile',value:'أريد إنشاء بروفايل واختيار منصة مناسبة'},
       {label:language==='ar'?'عندي بروفايل محتاج تطوير':'Improve my profile',value:'عندي بروفايل وأريد تطويره وتحسين ظهوره'},
@@ -476,11 +480,70 @@
     addGuideMessage(language==='ar'?'تقدر تضيف خدمة أو موضوعًا أو تجميعة إلى السلة، وبعدها تكمل طلبًا واحدًا. الأسعار النهائية والعروض الخاصة يؤكدها فريق خُطوة قبل التنفيذ.':'Add a service, topic, or combination to your basket and submit one request. Final pricing and any special offer are confirmed by Khutwa before work begins.');
     quickChips([{label:language==='ar'?'عندي احتياج آخر':'Another need',value:'لدي احتياج آخر وأريد اقتراحًا مختلفًا'},{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'}]);
   }
+  function renderGuideCards(serviceIds, topicIds, packageIds) {
+    const services=(serviceIds||[]).map(getService).filter(Boolean);
+    const topics=(topicIds||[]).map(getTopic).filter(Boolean);
+    const packages=(packageIds||[]).map(id=>DATA.packages.find(p=>p.id===id)).filter(Boolean);
+    if(!services.length && !topics.length && !packages.length) return false;
+    const host=document.createElement('div');host.className='guide-recommendations';
+    services.forEach(service=>{
+      const box=document.createElement('div');box.className='guide-recommendation';
+      const price=typeof service.price==='number'?` · ${escapeHTML(money(service.price))}`:'';
+      box.innerHTML=`<b>${escapeHTML(t(service.title))}${price}</b><p>${escapeHTML(t(service.short))}</p><button type="button" data-guide-add-service="${escapeHTML(service.id)}">${language==='ar'?'أضف الخدمة للسلة':'Add service to basket'}</button>`;
+      host.appendChild(box);
+    });
+    topics.forEach(topic=>{
+      const box=document.createElement('div');box.className='guide-recommendation';
+      box.innerHTML=`<b>${escapeHTML(t(topic))} · $${DATA.pricing.topicPrice}</b><p>${escapeHTML(t(topic.outcome))}</p><button type="button" data-guide-add-topic="${escapeHTML(topic.id)}">${language==='ar'?'أضف الموضوع':'Add topic'}</button>`;
+      host.appendChild(box);
+    });
+    packages.forEach(pkg=>{
+      const box=document.createElement('div');box.className='guide-recommendation guide-package-recommendation';
+      box.innerHTML=`<b>${language==='ar'?'تجميعة مقترحة: ':'Suggested combination: '}${escapeHTML(t(pkg.title))}</b><p>${escapeHTML(t(pkg.audience))} ${language==='ar'?'يمكنك سؤال خُطوة عن عرض التجميعة.':'Ask Khutwa about a tailored package offer.'}</p><button type="button" data-guide-add-package="${escapeHTML(pkg.id)}">${language==='ar'?'أضف التجميعة':'Add combination'}</button>`;
+      host.appendChild(box);
+    });
+    $('#guideMessages').appendChild(host);$('#guideMessages').scrollTop=$('#guideMessages').scrollHeight;
+    return true;
+  }
+  async function askAssistant(text) {
+    if(aiState.busy) return;
+    aiState.busy=true;
+    const typing=addGuideMessage(language==='ar'?'ثواني بكتب لك…':'One moment…');
+    typing.style.opacity='.65';
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),20000);
+    try {
+      const res=await fetch('/api/assistant',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({language,messages:guideHistory.slice(-8)}),signal:controller.signal});
+      const data=await res.json().catch(()=>null);
+      typing.remove();
+      if(!res.ok || !data || !data.ok || !data.reply) {
+        if(res.status===503) aiState.disabled=true;
+        recommendForText(text);
+        return;
+      }
+      guideHistory.push({role:'assistant',content:String(data.reply).slice(0,600)});
+      addGuideMessage(data.reply);
+      const shown=renderGuideCards(data.serviceIds,data.topicIds,data.packageIds);
+      const chips=Array.isArray(data.chips)?data.chips.filter(c=>c&&c.label&&c.value):[];
+      if(chips.length) quickChips(chips);
+      else if(shown) quickChips([{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'},{label:language==='ar'?'عندي احتياج آخر':'Another need',value:language==='ar'?'لدي احتياج آخر':'I have another need'}]);
+    } catch {
+      typing.remove();
+      recommendForText(text);
+    } finally {
+      clearTimeout(timer);
+      aiState.busy=false;
+    }
+  }
   function handleGuideInput(text) {
     const clean=String(text||'').trim(); if(!clean) return;
+    if(aiState.busy) return;
     addGuideMessage(clean,'user');
     if(['افتح السلة','open basket','show basket','view basket'].includes(clean.toLocaleLowerCase())) { closeGuide();$('#cartPanel').scrollIntoView({behavior:'smooth',block:'center'});return; }
-    recommendForText(clean);
+    guideHistory.push({role:'user',content:clean.slice(0,600)});
+    if(guideDirectAnswer(clean.toLocaleLowerCase())) { guideHistory.push({role:'assistant',content:'(Answered with the official price and offer information.)'}); return; }
+    if(aiState.disabled) { recommendForText(clean); return; }
+    askAssistant(clean);
   }
 
   function getVisitorId() {
