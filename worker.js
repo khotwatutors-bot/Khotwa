@@ -202,6 +202,28 @@ async function notifyGoogle(requestId, record, env) {
     await env.DB.prepare("UPDATE requests SET notification_status='failed', notification_error=? WHERE id=?").bind(clean(error.message, 300), requestId).run();
   }
 }
+async function notifyTelegram(requestId, record, adminUrl, env) {
+  const token = env.TELEGRAM_BOT_TOKEN;
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  try {
+    const labels = (record.selectedItems || []).map(item => item.label).join('، ');
+    const lines = [
+      '🔔 طلب جديد على خُطوة',
+      `رقم الطلب: ${requestId}`,
+      `الاسم: ${clean(record.customer?.name, 80)}`,
+      `الدولة: ${clean(record.customer?.country, 60)}`,
+      `التخصص: ${clean(record.customer?.subject, 80)}`,
+      `الخدمات: ${clean(labels, 600) || 'غير محدد'}`,
+      `لوحة الإدارة: ${adminUrl}`,
+    ];
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), disable_web_page_preview: true }),
+    });
+  } catch { /* The request is already saved; a failed Telegram alert must never affect it. */ }
+}
 async function createRequest(request, env, ctx) {
   if (!env.DB) return json({ ok: false, error: 'Database is not configured yet.' }, 503);
   let body;
@@ -235,6 +257,7 @@ async function createRequest(request, env, ctx) {
       try { await recordEvent(env, { visitorHash, name: 'request_submitted', page: '/#request', itemId: null }); } catch { /* The service request remains saved even if analytics logging fails. */ }
     }
     ctx.waitUntil(notifyGoogle(id, { ...storedRecord, requestId: id, createdAt: now }, env));
+    ctx.waitUntil(notifyTelegram(id, storedRecord, `${new URL(request.url).origin}/admin/`, env));
     return json({ ok: true, requestId: id, createdAt: now }, 201);
   } catch (error) {
     return json({ ok: false, error: 'Could not save your request. Please try again.' }, 500);
