@@ -18,6 +18,7 @@
   let lastRequest = null;
   let advisorStarted = false;
   let guideHistory = [];
+  let marketState = null;
   const aiState = { disabled: false, busy: false };
 
   function t(value) {
@@ -28,6 +29,7 @@
     return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
   function money(value) {
+    if (value === 0) return language === 'ar' ? 'مجاني' : 'Free';
     return value == null ? (language === 'ar' ? 'حسب نطاق الطلب' : 'Quoted by scope') : `$${Number(value).toFixed(Number(value)%1 ? 2 : 0)}`;
   }
   function loadBasket() {
@@ -80,6 +82,7 @@
       customTopic: { ar:'مثال: أريد موضوعات عن الحصة التجريبية، تشخيص المستوى، وتحويل الاستفسار إلى طالب منتظم.', en:'Example: I need topics on trial lessons, level diagnosis, and converting inquiries into regular learners.' },
       marketSubject: { ar:'مثال: تعليم العربية لغير الناطقين بها', en:'e.g. Arabic for non-native speakers' },
       marketCountry: { ar:'مثال: Germany', en:'e.g. Germany' },
+      marketResidence: { ar:'مثال: مصر', en:'e.g. Egypt' },
       clientName: { ar:'اكتب اسمك', en:'Your name' },
       clientWhatsApp: { ar:'+20...', en:'+1...' },
       requestGoal: { ar:'كلما كانت التفاصيل أوضح، كان اقتراح خُطوة أدق.', en:'The clearer your details, the more relevant Khutwa’s recommendation can be.' },
@@ -87,13 +90,16 @@
     };
     Object.entries(placeholders).forEach(([id, values]) => { const el = document.getElementById(id); if (el) el.placeholder = values[language]; });
     renderAll();
+    if (marketState) renderMarketResults();
     if ($('#guidePanel').classList.contains('open')) resetGuideWelcome(false);
   }
   function renderServices() {
     const host = $('#servicesGrid');
     host.innerHTML = DATA.services.map((service, index) => {
       const includes = (service.includes?.[language] || service.includes?.ar || []).slice(0, 4);
-      const priceLabel = service.price == null
+      const priceLabel = service.price === 0
+        ? `<div class="service-price">${language==='ar'?'مجاني':'Free'}</div>`
+        : service.price == null
         ? `<div class="service-price quote">${language==='ar'?'عرض سعر حسب الاحتياج':'Quote based on scope'}</div>`
         : service.id === 'individual_consultation'
           ? `<div class="service-price">$10–15<small>${escapeHTML(t(DATA.pricing.launchLabel))}</small></div>`
@@ -104,7 +110,7 @@
         <p class="service-short">${escapeHTML(t(service.short))}</p>
         <ul class="service-mini-list">${includes.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>
         <details class="service-details"><summary>${language==='ar'?'تفاصيل الخدمة والتسليمات':'Full scope and deliverables'}</summary><div class="details-content"><ul>${(service.includes?.[language]||service.includes.ar).map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>${payment}</div></details>
-        <div class="service-action">${service.id==='individual_consultation'?`<select class="consultation-duration" aria-label="${language==='ar'?'مدة الجلسة':'Session duration'}"><option value="30">${language==='ar'?'30 دقيقة · $10':'30 min · $10'}</option><option value="60">${language==='ar'?'60 دقيقة · $15':'60 min · $15'}</option></select>`:''}<small>${service.price==null?(language==='ar'?'السعر بعد مراجعة النطاق':'Price after scope review'):(language==='ar'?'سعر إطلاق':'Launch price')}</small><button class="button button-soft" type="button" data-add-service="${escapeHTML(service.id)}">${language==='ar'?'أضف إلى السلة':'Add to basket'}</button></div>
+        <div class="service-action">${service.id==='individual_consultation'?`<select class="consultation-duration" aria-label="${language==='ar'?'مدة الجلسة':'Session duration'}"><option value="30">${language==='ar'?'30 دقيقة · $10':'30 min · $10'}</option><option value="60">${language==='ar'?'60 دقيقة · $15':'60 min · $15'}</option></select>`:''}<small>${service.price===0?(language==='ar'?'مجاني ولا يلزمك شراء شيء':'Free, no purchase required'):service.price==null?(language==='ar'?'السعر بعد مراجعة النطاق':'Price after scope review'):(language==='ar'?'سعر إطلاق':'Launch price')}</small><button class="button button-soft" type="button" data-add-service="${escapeHTML(service.id)}">${language==='ar'?'أضف إلى السلة':'Add to basket'}</button></div>
       </article>`;
     }).join('');
   }
@@ -205,8 +211,8 @@
     $('#cartEmpty').classList.toggle('hidden', entries.length>0);
     host.innerHTML = entries.map(({entry,index,item}) => {
       const price = basketPrice(entry);
-      const subtitle = item.kind==='topic' ? t(item.data.pathTitle) : item.kind==='custom' ? entry.text : item.kind==='package' ? (language==='ar'?'تجميعة مخصصة':'Custom combination') : (price==null?(language==='ar'?'يحدد بعد مراجعة النطاق':'Quoted after scope review'):(language==='ar'?'سعر إطلاق':'Launch price'));
-      return `<div class="cart-item"><div class="cart-item-main"><span>✦</span><div><b>${escapeHTML(basketLabel(entry))}</b><small>${escapeHTML(subtitle)}</small></div></div><div style="display:flex;align-items:center;gap:12px"><span class="cart-item-price">${price==null?(language==='ar'?'عرض سعر':'Quote'):`$${(price*(entry.qty||1)).toFixed(2)}`}</span><button type="button" data-remove-item="${index}">${language==='ar'?'حذف':'Remove'}</button></div></div>`;
+      const subtitle = item.kind==='topic' ? t(item.data.pathTitle) : item.kind==='custom' ? entry.text : item.kind==='package' ? (language==='ar'?'تجميعة مخصصة':'Custom combination') : (price===0?(language==='ar'?'مجانية':'Free'):price==null?(language==='ar'?'يحدد بعد مراجعة النطاق':'Quoted after scope review'):(language==='ar'?'سعر إطلاق':'Launch price'));
+      return `<div class="cart-item"><div class="cart-item-main"><span>✦</span><div><b>${escapeHTML(basketLabel(entry))}</b><small>${escapeHTML(subtitle)}</small></div></div><div style="display:flex;align-items:center;gap:12px"><span class="cart-item-price">${price===0?(language==='ar'?'مجاني':'Free'):price==null?(language==='ar'?'عرض سعر':'Quote'):`$${(price*(entry.qty||1)).toFixed(2)}`}</span><button type="button" data-remove-item="${index}">${language==='ar'?'حذف':'Remove'}</button></div></div>`;
     }).join('');
     const subtotal = entries.reduce((sum,row)=>sum+(basketPrice(row.entry)||0)*(row.entry.qty||1),0);
     const hasQuote = entries.some(row=>basketPrice(row.entry)==null);
@@ -302,19 +308,103 @@
   function switchLanguage() { language = language==='ar'?'en':'ar'; updateStaticLanguage(); }
 
   // Preliminary market discovery. Search links are external; final analysis remains human-led.
+  /* ---------- Platform finder v2 (rules based, preliminary, no live data) ---------- */
+  const MARKET_PLATFORMS = [
+    { id:'preply', name:'Preply', domain:'preply.com', fit:{language:3,academic:2,skill:1,quran:1}, note:{ar:'سوق دروس خاصة معروف، وأقوى حضورًا في اللغات.',en:'A well-known private-lesson marketplace, strongest for languages.'} },
+    { id:'italki', name:'italki', domain:'italki.com', fit:{language:3,academic:0,skill:0,quran:0}, note:{ar:'سوق متخصص أساسًا في تعلّم اللغات.',en:'A marketplace focused mainly on language learning.'} },
+    { id:'verbling', name:'Verbling', domain:'verbling.com', fit:{language:3,academic:0,skill:0,quran:0}, note:{ar:'منصة موجهة للغات.',en:'A platform aimed at language learning.'} },
+    { id:'amazingtalker', name:'AmazingTalker', domain:'amazingtalker.com', fit:{language:3,academic:1,skill:1,quran:0}, note:{ar:'منصة لغات حضورها قوي بين متعلمين من آسيا.',en:'A language platform with a strong presence among learners in Asia.'} },
+    { id:'superprof', name:'Superprof', domain:'superprof.com', fit:{language:2,academic:3,skill:3,quran:1}, note:{ar:'دليل مدرسين لمواد متنوعة.',en:'A tutor directory covering many subjects.'} },
+    { id:'teacheron', name:'TeacherOn', domain:'teacheron.com', fit:{language:2,academic:3,skill:2,quran:1}, note:{ar:'منصة لمواد متنوعة.',en:'A platform for many subjects.'} },
+    { id:'classgap', name:'Classgap', domain:'classgap.com', fit:{language:2,academic:2,skill:1,quran:0}, note:{ar:'منصة دروس لعدة مواد.',en:'A lessons platform for several subjects.'} },
+    { id:'51talk', name:'51Talk', domain:'51talk.com', fit:{language:0,academic:0,skill:0,quran:0}, special:true, note:{ar:'تركّز على تعليم الإنجليزية لمتعلمين ناطقين بالصينية.',en:'Focused on English lessons for Chinese-speaking learners.'} }
+  ];
+  const MARKET_GOAL_TIPS = {
+    extra:{ar:'لدخل إضافي: ابدأ بمنصة واحدة أو اتنين وجرّبهم عدة أسابيع قبل ما تضيف غيرهم.',en:'For extra income: start with one or two platforms and test them for a few weeks before adding more.'},
+    full:{ar:'لدخل أساسي: وزّع على منصة رئيسية وواحدة احتياطية، وما تعتمدش على مصدر واحد.',en:'For a main income: use one main platform and one backup, and do not depend on a single source.'},
+    switch:{ar:'لو هتنتقل: قارن العمولة وسياسات التواصل مع الطلاب خارج المنصة قبل ما تنقل أي طلاب.',en:'If you are switching: compare commission and off-platform contact policies before moving any learners.'},
+    start:{ar:'لو بتبدأ أونلاين: جهّز بروفايل واضح وفيديو تعريفي قبل التسجيل، فالانطباع الأول بيفرق.',en:'If you are starting online: prepare a clear profile and intro video before registering; first impressions matter.'}
+  };
+  function enhanceMarketForm() {
+    const grid=document.querySelector('.market-form-grid'); if(!grid || $('#marketSubjectType')) return;
+    const lang=$('#marketLearnerLang'); if(lang && ![...lang.options].some(o=>o.value==='Chinese')) { const opt=document.createElement('option'); opt.value='Chinese'; opt.textContent='中文'; lang.insertBefore(opt,lang.querySelector('option[value="Other"]')); }
+    const mk=(html)=>{ const d=document.createElement('div'); d.className='form-field'; d.innerHTML=html; grid.appendChild(d); };
+    mk(`<label for="marketSubjectType" data-ar="نوع المادة" data-en="Subject type">نوع المادة</label><select id="marketSubjectType"><option value="language" data-ar="لغة" data-en="A language">لغة</option><option value="academic" data-ar="مادة دراسية" data-en="School/academic subject">مادة دراسية</option><option value="skill" data-ar="مهارة مهنية" data-en="Professional skill">مهارة مهنية</option><option value="quran" data-ar="قرآن وعلوم شرعية" data-en="Quran / Islamic studies">قرآن وعلوم شرعية</option></select>`);
+    mk(`<label for="marketGoal" data-ar="هدفك" data-en="Your goal">هدفك</label><select id="marketGoal"><option value="extra" data-ar="دخل إضافي" data-en="Extra income">دخل إضافي</option><option value="full" data-ar="دخل أساسي" data-en="Main income">دخل أساسي</option><option value="switch" data-ar="الانتقال من منصة" data-en="Switching platform">الانتقال من منصة</option><option value="start" data-ar="أبدأ أونلاين من الصفر" data-en="Starting online">أبدأ أونلاين من الصفر</option></select>`);
+    mk(`<label for="marketResidence" data-ar="بلد إقامتك" data-en="Your country">بلد إقامتك</label><input id="marketResidence" placeholder="${language==='ar'?'مثال: مصر':'e.g. Egypt'}">`);
+    const reqBtn=$('#requestMarketAnalysis');
+    if(reqBtn) { reqBtn.dataset.ar='اطلب دراسة حالة مجانية'; reqBtn.dataset.en='Request a free case study'; }
+    updateStaticLanguage();
+  }
+  function marketScore(p, type, learner, subject) {
+    let score = p.fit[type] || 0;
+    if(p.special) {
+      const english=/english|انجليز|إنجليز/i.test(subject);
+      return (learner==='Chinese' && type==='language' && english) ? 5 : 0;
+    }
+    if(learner==='Chinese' && p.id==='amazingtalker') score+=2;
+    if(['Spanish','French','German'].includes(learner) && (p.id==='italki'||p.id==='verbling') && type==='language') score+=1;
+    return score;
+  }
+  function marketLevel(score, top) {
+    if(score>=3 && score>=top) return {ar:'ملاءمة مبدئية عالية',en:'High preliminary fit',color:'#7ee2b8'};
+    if(score>=2) return {ar:'ملاءمة مبدئية متوسطة',en:'Medium preliminary fit',color:'#ffd27a'};
+    return {ar:'ملاءمة منخفضة، تحتاج تحقق',en:'Low fit, needs checking',color:'#b9c0d6'};
+  }
+  function marketSummaryText() {
+    if(!marketState) return '';
+    const s=marketState;
+    const lines=language==='ar'
+      ? [`ملخص بحث المنصات (أولي):`,`المادة: ${s.subject} (${s.typeLabel})`,`لغة الطلاب: ${s.learner} | الفئة: ${s.audienceLabel}`,`البلد المستهدف: ${s.country||'-'} | بلد الإقامة: ${s.residence||'-'}`,`الهدف: ${s.goalLabel}`,`أعلى ملاءمة مبدئية: ${s.top.map(x=>x.name).join('، ')||'-'}`]
+      : [`Platform search summary (preliminary):`,`Subject: ${s.subject} (${s.typeLabel})`,`Learner language: ${s.learner} | Audience: ${s.audienceLabel}`,`Target country: ${s.country||'-'} | My country: ${s.residence||'-'}`,`Goal: ${s.goalLabel}`,`Top preliminary fit: ${s.top.map(x=>x.name).join(', ')||'-'}`];
+    return lines.join('\n');
+  }
+  function renderMarketResults() {
+    const host=$('#marketResults'); if(!host || !marketState) return;
+    const s=marketState;
+    const google=q=>'https://www.google.com/search?q='+encodeURIComponent(q);
+    const linkStyle='style="display:inline-block;margin:6px 6px 0 0;padding:4px 9px;border:1px solid var(--line);border-radius:999px;font-size:9px;color:#dfe6ff;text-decoration:none"';
+    const cards=s.ranked.map(item=>{
+      const p=item.p, lvl=marketLevel(item.score, s.ranked[0].score), q=[s.subject,s.learner,s.country].filter(Boolean).join(' ');
+      return `<div class="market-result"><b>${escapeHTML(p.name)} <span style="font-size:9px;font-weight:400;color:${lvl.color}">· ${escapeHTML(t(lvl))}</span></b><small>${escapeHTML(t(p.note))}</small><div>
+        <a ${linkStyle} href="https://${p.domain}/" target="_blank" rel="noopener noreferrer">${language==='ar'?'الموقع الرسمي ↗':'Official site ↗'}</a>
+        <a ${linkStyle} href="${google(`site:${p.domain} ${q} tutor`)}" target="_blank" rel="noopener noreferrer">${language==='ar'?'مدرسين مشابهين ↗':'Similar tutors ↗'}</a>
+        <a ${linkStyle} href="${google(`site:${p.domain} become a tutor apply requirements`)}" target="_blank" rel="noopener noreferrer">${language==='ar'?'شروط التقديم ↗':'How to apply ↗'}</a></div></div>`;
+    }).join('');
+    const quranNote=s.type==='quran'?`<div class="market-result"><small>${language==='ar'?'ملاحظة: القرآن والعلوم الشرعية قد لا تناسبها المنصات العامة. يحتاج بحثًا عن منصات متخصصة، وده بيتم في المراجعة البشرية.':'Note: general platforms may not suit Quran or Islamic studies. Specialised platforms need to be researched, which the human review covers.'}</small></div>`:'';
+    const hidden=s.hiddenCount>0?`<div class="market-result"><small>${language==='ar'?`تم إخفاء ${s.hiddenCount} منصة/منصات ملاءمتها المبدئية ضعيفة لمادتك.`:`${s.hiddenCount} platform(s) with weak preliminary fit for your subject are hidden.`}</small></div>`:'';
+    const checklist=language==='ar'
+      ? ['العمولة أو رسوم الاشتراك الحالية','شروط القبول وخطوات المراجعة','طرق السحب المتاحة في بلدك','سياسات البروفايل والفيديو والتواصل خارج المنصة','عدد المنافسين في تخصصك وأسعارهم الظاهرة']
+      : ['Current commission or subscription fees','Acceptance requirements and review steps','Payout methods available in your country','Rules for profiles, videos and off-platform contact','Number of competitors in your subject and their visible prices'];
+    host.innerHTML=`<div class="market-result"><b>${language==='ar'?'ملخص مبدئي':'Preliminary summary'}</b><small>${escapeHTML(t(MARKET_GOAL_TIPS[s.goal]))}</small></div>${cards}${quranNote}${hidden}
+      <div class="market-result"><b>${language==='ar'?'تحقق منها قبل التسجيل':'Verify before registering'}</b><small>${checklist.map(x=>'• '+escapeHTML(x)).join('<br>')}</small></div>
+      <div class="market-result"><small>${language==='ar'?'الترتيب تقديري مبني على قواعد عامة، وليس بيانات حالية من المنصات ولا توصية نهائية. التقرير البشري يؤكد المصادر وتاريخ البحث.':'The ranking is an estimate from general rules, not live platform data or a final recommendation. The human report confirms sources and the research date.'}</small>
+      <button type="button" id="copyMarketSummary" class="button button-outline full-button" style="margin-top:8px">${language==='ar'?'انسخ الملخص':'Copy summary'}</button></div>`;
+    const copyBtn=$('#copyMarketSummary');
+    if(copyBtn) copyBtn.addEventListener('click',async()=>{ try { await navigator.clipboard.writeText(marketSummaryText()); showToast(language==='ar'?'تم نسخ الملخص.':'Summary copied.'); } catch { showToast(language==='ar'?'تعذر النسخ، انسخه يدويًا.':'Could not copy; please copy manually.'); } });
+  }
   function buildSearchLinks() {
     const subject=$('#marketSubject').value.trim();
     if(!subject) { $('#marketSubject').focus(); showToast(language==='ar'?'اكتب التخصص أولًا.':'Enter a subject first.'); return; }
+    const type=($('#marketSubjectType')||{}).value||'language';
+    const goal=($('#marketGoal')||{}).value||'extra';
     const learner=$('#marketLearnerLang').value;
     const country=$('#marketCountry').value.trim();
-    const audience=$('#marketAudience').value;
-    const query=[subject,learner,country,audience].filter(Boolean).join(' ');
-    const platforms=[['Preply','preply.com'],['italki','italki.com'],['Verbling','verbling.com'],['AmazingTalker','amazingtalker.com'],['Superprof','superprof.com'],['TeacherOn','teacheron.com'],['Classgap','classgap.com'],['51Talk','51talk.com']];
-    const host=$('#marketResults');
-    host.innerHTML=platforms.map(([name,domain])=>{
-      const url='https://www.google.com/search?q='+encodeURIComponent(`site:${domain} ${query} tutor teacher lessons`);
-      return `<a class="market-result" href="${url}" target="_blank" rel="noopener noreferrer"><b>${name}</b><small>${language==='ar'?'افتح نتائج البحث الأولي ↗':'Open preliminary search ↗'}</small></a>`;
-    }).join('');
+    const residence=(($('#marketResidence')||{}).value||'').trim();
+    const audienceEl=$('#marketAudience');
+    const scored=MARKET_PLATFORMS.map(p=>({p,score:marketScore(p,type,learner,subject)})).sort((a,b)=>b.score-a.score);
+    const visible=scored.filter(x=>x.score>=1);
+    const ranked=visible.length?visible:scored.slice(0,3);
+    const pick=(el)=>el&&el.selectedOptions&&el.selectedOptions[0]?el.selectedOptions[0].textContent:'';
+    marketState={subject,type,goal,learner,country,residence,ranked,hiddenCount:scored.length-ranked.length,
+      top:ranked.slice(0,3).map(x=>x.p),typeLabel:pick($('#marketSubjectType')),goalLabel:pick($('#marketGoal')),audienceLabel:pick(audienceEl)};
+    renderMarketResults();
+  }
+  function fillMarketRequest() {
+    if(!marketState) return;
+    const goalField=$('#requestGoal');
+    if(goalField && !goalField.value.trim()) goalField.value=marketSummaryText();
+    const c=$('#marketResidenceRequest'); if(c && !c.value) c.value=marketState.residence;
   }
 
   function collectRequest() {
@@ -856,9 +946,11 @@
     if(!text){showToast(language==='ar'?'اكتب الموضوع المطلوب أولًا.':'Describe the topic first.');$('#customTopic').focus();return;}
     basket.push({type:'custom',id:`custom-${Date.now()}`,text});trackEvent('add_to_cart',{item_id:'custom-topic'});$('#customTopicsInForm').value=text;renderBasket();$('#customTopic').value='';showToast(language==='ar'?'تمت إضافة طلبك المخصص.':'Your custom topic request was added.');
   });
+  enhanceMarketForm();
   $('#runMarketSearch').addEventListener('click',buildSearchLinks);
   $('#requestMarketAnalysis').addEventListener('click',()=>{
     addItem('service','market_review');
+    fillMarketRequest();
     $('#marketCountryRequest').value=$('#marketCountry').value;
     $('#marketLanguageRequest').value=$('#marketLearnerLang').value;
     $('#request').scrollIntoView({behavior:'smooth'});
