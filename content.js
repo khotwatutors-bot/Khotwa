@@ -676,43 +676,43 @@ window.KHUTWA_DATA = {
     {
       "id": "market_review",
       "category": "market",
-      "price": null,
-      "featured": false,
+      "price": 0,
+      "featured": true,
       "title": {
-        "ar": "مراجعة سوق ومنصات مستقلة",
-        "en": "Standalone Market & Platform Review"
+        "ar": "دراسة حالة مجانية",
+        "en": "Free Case Study"
       },
       "short": {
-        "ar": "مراجعة بشرية للتخصص والمنصات والجمهور والمنافسين عندما تحتاج الدراسة خارج إنشاء أو تطوير البروفايل.",
-        "en": "A human review of subject, platforms, audience, and competitors when you need research outside profile creation or development."
+        "ar": "ندرس بروفايلك وحالتك والمنصة التي تعمل عليها أو تفكر فيها، ونرسل لك تقريرًا بنقاط القوة والعوائق والخطوات المقترحة. مجانية ولا تلزمك بأي خدمة مدفوعة.",
+        "en": "We study your profile, your situation and the platform you use or are considering, then send a report with strengths, obstacles and suggested next steps. Free, with no obligation to buy any paid service."
       },
       "includes": {
         "ar": [
-          "تحديد سؤال البحث وحدوده والجمهور المستهدف.",
-          "مراجعة المنصات والأكاديميات ذات الصلة من مصادر متاحة.",
-          "جمع عينات مناسبة وروابط مباشرة وتاريخ البحث.",
-          "مقارنة متطلبات وشروط وعروض ظاهرة عند توفرها.",
-          "تقديم خلاصة عملية وتوصيات وخطوات تالية."
+          "فهم حالتك وهدفك من بياناتك ورابط بروفايلك أو منصتك إن وُجد.",
+          "تحديد نقاط القوة والفجوات الظاهرة في عرضك المهني.",
+          "مراجعة المنصة التي تعمل عليها أو تفكر في الانتقال إليها ومدى ملاءمتها لتخصصك.",
+          "تقرير مكتوب بأهم العوائق وخطوات مقترحة مرتبة حسب الأولوية.",
+          "ترشيح خدمات أو موضوعات من خُطوة فقط إن كانت تخدم حالتك فعلًا، ودون أي إلزام."
         ],
         "en": [
-          "Define the research question, scope, and target audience.",
-          "Review relevant platforms and academies using available sources.",
-          "Collect relevant samples, direct links, and research date.",
-          "Compare visible requirements, terms, and offers where available.",
-          "Deliver a practical summary, recommendations, and next steps."
+          "Understand your situation and goal from your details and your profile or platform link, if any.",
+          "Identify the visible strengths and gaps in your professional presentation.",
+          "Review the platform you use or are considering and how well it suits your subject.",
+          "A written report with the most important obstacles and suggested steps in priority order.",
+          "Suggest Khutwa services or topics only if they genuinely serve your case, with no obligation."
         ]
       },
       "delivery": {
-        "ar": "تُحدد بعد مراجعة نطاق البحث وعدد المنصات والمجالات المطلوبة.",
-        "en": "Confirmed after reviewing the research scope, number of platforms, and subjects."
+        "ar": "نراجع الطلبات بالترتيب، وقد نحتاج وقتًا حسب عدد الطلبات. نبلغك بالموعد المتوقع بعد استلام طلبك.",
+        "en": "We review requests in order and may need time depending on volume. We tell you the expected timing after receiving your request."
       },
       "payment": {
-        "ar": "يُرسل عرض سعر واضح قبل البدء.",
-        "en": "A clear quote is provided before work begins."
+        "ar": "مجانية. لا تدفع شيئًا مقابل دراسة الحالة، ولا يلزمك شراء أي خدمة بعدها.",
+        "en": "Free. You pay nothing for the case study and are not required to buy any service afterwards."
       },
       "notes": {
-        "ar": "أداة البحث الأولي تفتح روابط خارجية؛ التقرير النهائي يتطلب مراجعة بشرية وتوثيق العينة والمصادر. لا نستخدم جمع بيانات مخالفًا لشروط المنصات.",
-        "en": "The preliminary search tool opens external links; a final report requires human review and documentation of sources and samples. We do not use data collection that violates platform terms."
+        "ar": "التقرير مبني على بياناتك وعلى ما هو متاح علنًا من مصادر، وهو ليس ضمانًا لنتيجة معينة. لا نشارك تقريرك ولا نستخدمه في أي عرض عام إلا بموافقتك الكتابية. لا نستخدم جمع بيانات مخالفًا لشروط المنصات.",
+        "en": "The report is based on your details and publicly available sources and is not a guarantee of any result. We do not share your report or use it publicly without your written consent. We do not use data collection that violates platform terms."
       },
       "recommend": [
         "topic_platform_models",
@@ -1754,6 +1754,16 @@ window.KHUTWA_DATA = {
       "a": {
         "ar": "نعم. أضف الخدمات والموضوعات إلى السلة، ثم أرسل طلبًا واحدًا. يراجع الفريق التفاصيل ويؤكد النطاق والسعر والدفعات قبل بدء العمل.",
         "en": "Yes. Add services and topics to the basket and submit one combined request. The team reviews the details and confirms scope, price, and installments before work begins."
+      }
+    },
+    {
+      "q": {
+        "ar": "هل دراسة الحالة مجانية فعلًا؟",
+        "en": "Is the case study really free?"
+      },
+      "a": {
+        "ar": "نعم. تقديم الطلب ودراسة الحالة مجانيان، ولا يلزمك شراء أي خدمة بعدها. نرسل لك تقريرًا بنتيجة الدراسة والخطوات المقترحة، وقد نرشّح خدمة من خُطوة فقط إن كانت تناسب حالتك. الأسعار تظهر لتعرف ما قد يتم لاحقًا، ويؤكد فريق خُطوة العرض النهائي قبل أي تنفيذ مدفوع.",
+        "en": "Yes. Submitting a request and the case study are free, and you are not required to buy any service afterwards. We send you a report with the findings and suggested steps, and may suggest a Khutwa service only if it suits your case. Prices are shown so you know what could follow, and Khutwa confirms the final offer before any paid work."
       }
     },
     {
