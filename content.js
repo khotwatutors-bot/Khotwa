@@ -1686,7 +1686,8 @@ window.KHUTWA_DATA = {
           "ar": "نموذج بروفايل 01",
           "en": "Profile Sample 01"
         },
-        "url": "https://drive.google.com/file/d/1XIWQDqSV3c18V7NyZg6loqZ5j1oas53N/view?usp=drivesdk"
+        "url": "",
+        "pendingLink": true
       },
       {
         "title": {
