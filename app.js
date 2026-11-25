@@ -8,18 +8,36 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const STORAGE_KEY = 'khutwa_v4_basket';
+  const LANG_STORAGE_KEY = 'khutwa_lang';
   const ANALYTICS_CONSENT_KEY = 'khutwa_analytics_consent';
   const VISITOR_KEY = 'khutwa_visitor_id';
+  function detectInitialLanguage() {
+    try {
+      const param = new URLSearchParams(window.location.search).get('lang');
+      if (param) {
+        const norm = param.trim().toLowerCase();
+        if (norm === 'ar' || norm === 'en') return norm;
+      }
+    } catch {}
+    try {
+      const saved = localStorage.getItem(LANG_STORAGE_KEY);
+      if (saved === 'ar' || saved === 'en') return saved;
+    } catch {}
+    try {
+      const browserLang = String((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
+      if (browserLang.startsWith('ar')) return 'ar';
+      if (browserLang) return 'en';
+    } catch {}
+    return 'ar';
+  }
   let requestStartedTracked = false;
-  let language = 'ar';
+  let language = detectInitialLanguage();
   let activeTopicFilter = 'all';
   let activePortfolioTab = 'videos';
   let basket = loadBasket();
   let lastRequest = null;
   let advisorStarted = false;
-  let guideHistory = [];
   let marketState = null;
-  const aiState = { disabled: false, busy: false };
 
   function t(value) {
     if (value && typeof value === 'object') return value[language] || value.ar || value.en || '';
@@ -68,10 +86,23 @@
     const el = $(selector);
     if (el) el.textContent = value;
   }
+  function syncEmailRequirement() {
+    const emailEl = $('#clientEmail');
+    const contactEl = $('#preferredContact');
+    if (emailEl && contactEl) emailEl.required = contactEl.value === 'Email';
+  }
   function updateStaticLanguage() {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.body.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.title = language === 'ar' ? 'خُطوة | نموّك المهني' : 'Khutwa | Tutor Growth & Support';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', language === 'ar'
+        ? 'خُطوة — نموّك المهني. خدمات تطوير البروفايل والفيديو، مكتبة موضوعات للمدرسين، وإرشاد لاختيار الخطوة المناسبة.'
+        : 'Khutwa helps online tutors with profile creation and development, intro videos, topic sessions, and a free case study.');
+    }
+    syncEmailRequirement();
     $$('[data-ar][data-en]').forEach(el => {
       const value = el.dataset[language];
       if (value !== undefined) el.textContent = value;
@@ -275,7 +306,7 @@
     $('#videoType').required = needsVideo && basket.some(x=>x.type==='service' && ['video_creation','video_bundle'].includes(x.id));
   }
   function renderPortfolio() {
-    const items = DATA.portfolio[activePortfolioTab] || [];
+    const items = (DATA.portfolio[activePortfolioTab] || []).filter(item => item && item.url && !item.pendingLink);
     $('#portfolioGrid').innerHTML = items.map((item,index)=>`<article class="portfolio-card"><span class="portfolio-index">${activePortfolioTab==='videos'?'VIDEO':'PROFILE'} · ${String(index+1).padStart(2,'0')}</span><h3>${escapeHTML(t(item.title))}</h3><p>${language==='ar'?'نموذج ضمن بورتفوليو خُطوة':'A sample from Khutwa portfolio'}</p><a class="button button-outline" href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer">${language==='ar'?'فتح النموذج':'Open sample'} ↗</a></article>`).join('');
     $$('[data-portfolio-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.portfolioTab===activePortfolioTab));
   }
@@ -305,7 +336,11 @@
     $('#emailContact').href=`mailto:${DATA.contact.email}`; $('#emailContact').textContent=DATA.contact.email;
     $('#linkedinContact').href=DATA.contact.linkedin;
   }
-  function switchLanguage() { language = language==='ar'?'en':'ar'; updateStaticLanguage(); }
+  function switchLanguage() {
+    language = language==='ar'?'en':'ar';
+    try { localStorage.setItem(LANG_STORAGE_KEY, language); } catch {}
+    updateStaticLanguage();
+  }
 
   // Preliminary market discovery. Search links are external; final analysis remains human-led.
   /* ---------- Platform finder v2 (rules based, preliminary, no live data) ---------- */
@@ -404,7 +439,7 @@
     if(!marketState) return;
     const goalField=$('#requestGoal');
     if(goalField && !goalField.value.trim()) goalField.value=marketSummaryText();
-    const c=$('#marketResidenceRequest'); if(c && !c.value) c.value=marketState.residence;
+    const c=$('#clientCountry'); if(c && !c.value.trim() && marketState.residence) c.value=marketState.residence;
   }
 
   function collectRequest() {
@@ -476,7 +511,6 @@
   function resetGuideWelcome(push=true) {
     if(push) $('#guideMessages').innerHTML='';
     advisorStarted=true;
-    guideHistory=[];
     addGuideMessage(language==='ar'?'أهلًا بيك في خُطوة. أنا مساعد آلي، هسألك كام سؤال بسيط عشان أفهم وضعك وأقترح عليك الأنسب، والقرار في الآخر ليك. من فضلك متكتبش كلمات مرور أو بيانات حساسة. إيه أقرب حاجة لوضعك؟':'Welcome to Khutwa. I am an automated assistant: I will ask a few simple questions to understand your situation and suggest what fits best, and the decision stays yours. Please do not share passwords or sensitive data. Which option best describes your situation?');
     flowStart();
   }
@@ -564,7 +598,6 @@
     quickChips([{label:language==='ar'?'عندي احتياج آخر':'Another need',value:'لدي احتياج آخر وأريد اقتراحًا مختلفًا'},{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'}]);
   }
   /* ---------- Guided advisor (rules based, no external AI) ---------- */
-  const AI_ENABLED = false; // set to true only after the ANTHROPIC_API_KEY secret exists in Cloudflare
   const FLOW_SITUATIONS = [
     { id:'new', label:{ar:'عايز أبدأ كمدرس جديد',en:'I am starting as a new tutor'} },
     { id:'profile', label:{ar:'عندي بروفايل ومحتاج أحسنه',en:'I have a profile to improve'} },
@@ -812,7 +845,6 @@
       addGuideMessage(labels[id]||id,'user'); flowRecommend(id);
     }
   }
-  aiState.disabled = !AI_ENABLED;
   function renderGuideCards(serviceIds, topicIds, packageIds) {
     const services=(serviceIds||[]).map(getService).filter(Boolean);
     const topics=(topicIds||[]).map(getTopic).filter(Boolean);
@@ -838,47 +870,13 @@
     $('#guideMessages').appendChild(host);$('#guideMessages').scrollTop=$('#guideMessages').scrollHeight;
     return true;
   }
-  function fallbackAnswer(text) { if(!understandFreeText(text)) unknownFreeText(text); }
-  async function askAssistant(text) {
-    if(aiState.busy) return;
-    aiState.busy=true;
-    const typing=addGuideMessage(language==='ar'?'ثواني بكتب لك…':'One moment…');
-    typing.style.opacity='.65';
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),20000);
-    try {
-      const res=await fetch('/api/assistant',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({language,messages:guideHistory.slice(-8)}),signal:controller.signal});
-      const data=await res.json().catch(()=>null);
-      typing.remove();
-      if(!res.ok || !data || !data.ok || !data.reply) {
-        if(res.status===503) aiState.disabled=true;
-        fallbackAnswer(text);
-        return;
-      }
-      guideHistory.push({role:'assistant',content:String(data.reply).slice(0,600)});
-      addGuideMessage(data.reply);
-      const shown=renderGuideCards(data.serviceIds,data.topicIds,data.packageIds);
-      const chips=Array.isArray(data.chips)?data.chips.filter(c=>c&&c.label&&c.value):[];
-      if(chips.length) quickChips(chips);
-      else if(shown) quickChips([{label:language==='ar'?'افتح السلة':'Open basket',value:'Open basket'},{label:language==='ar'?'عندي احتياج آخر':'Another need',value:language==='ar'?'لدي احتياج آخر':'I have another need'}]);
-    } catch {
-      typing.remove();
-      fallbackAnswer(text);
-    } finally {
-      clearTimeout(timer);
-      aiState.busy=false;
-    }
-  }
   function handleGuideInput(text) {
     const clean=String(text||'').trim(); if(!clean) return;
-    if(aiState.busy) return;
     if(clean.startsWith('flow:')) { handleFlow(clean); return; }
     addGuideMessage(clean,'user');
     if(['افتح السلة','open basket','show basket','view basket'].includes(clean.toLocaleLowerCase())) { closeGuide();$('#cartPanel').scrollIntoView({behavior:'smooth',block:'center'});return; }
-    guideHistory.push({role:'user',content:clean.slice(0,600)});
-    if(guideDirectAnswer(clean.toLocaleLowerCase())) { guideHistory.push({role:'assistant',content:'(Answered with the official price and offer information.)'}); return; }
-    if(aiState.disabled) { if(!understandFreeText(clean)) unknownFreeText(clean); return; }
-    askAssistant(clean);
+    if(guideDirectAnswer(clean.toLocaleLowerCase())) return;
+    if(!understandFreeText(clean)) unknownFreeText(clean);
   }
 
   function getVisitorId() {
@@ -955,6 +953,7 @@
     $('#marketLanguageRequest').value=$('#marketLearnerLang').value;
     $('#request').scrollIntoView({behavior:'smooth'});
   });
+  $('#preferredContact').addEventListener('change',syncEmailRequirement);
   $('#requestForm').addEventListener('submit',submitRequest);
   $('#requestForm').addEventListener('focusin',()=>{if(!requestStartedTracked){requestStartedTracked=true;trackEvent('request_started',{page:'/request'});}});
   $('#futureIdeaBtn').addEventListener('click',()=>{
@@ -971,5 +970,5 @@
   $$('img[data-fallback="banner"]').forEach(img=>img.addEventListener('error',()=>img.closest('.hero-image-frame')?.classList.add('image-failed'),{once:true}));
   // Correct the image-fallback state if an asset is already unavailable when the listener is registered.
   $$('img[data-fallback]').forEach(img=>{if(img.complete&&img.naturalWidth===0)img.dispatchEvent(new Event('error'));});
-  renderAll();
+  updateStaticLanguage();
 })();
