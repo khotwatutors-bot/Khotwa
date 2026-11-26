@@ -1,5 +1,5 @@
 window.KHUTWA_DATA = {
-  "version": "4.0.0",
+  "version": "5.0.0",
   "brand": {
     "name": "خُطوة",
     "latin": "KHUTWA",
@@ -318,29 +318,42 @@ window.KHUTWA_DATA = {
   },
   "pricing": {
     "currency": "USD",
+    "launchEnds": "2027-05-26",
     "topicPrice": 3,
+    "topicRegularPrice": 5,
+    "packageDiscountPercent": 15,
+    "weeklyCapacity": 10,
+    "showCapacityBar": true,
+    "showExactSeatsCount": true,
+    "publicStatsThreshold": 5,
     "launchLabel": {
-      "ar": "سعر إطلاق",
-      "en": "Launch price"
+      "ar": "سعر إطلاق (6 شهور)",
+      "en": "6-Month Launch Price"
+    },
+    "regularLabel": {
+      "ar": "السعر الأساسي",
+      "en": "Regular Price"
     },
     "topicBundleMessage": {
-      "ar": "تتوفر عروض خاصة عند اختيار مجموعة من الموضوعات أو تصميم جلسة مخصصة. اسأل فريق خُطوة عن العرض المناسب قبل تأكيد الطلب.",
-      "en": "Special offers are available for topic bundles and custom sessions. Ask Khutwa for the offer that fits your request before confirming."
+      "ar": "سعر الإطلاق $3 بدل $5 لكل موضوع. تتوفر عروض إضافية عند اختيار مجموعة موضوعات أو باقة مخصصة.",
+      "en": "Launch price $3 instead of $5 per topic. Additional offers apply when combining topics or curated bundles."
     },
     "packageMessage": {
-      "ar": "تُحدد عروض الباقات وفق الخدمات والموضوعات التي تختارها. تواصل مع خُطوة لمعرفة الخصم المناسب لطلبك.",
-      "en": "Package offers depend on the services and topics you select. Contact Khutwa for the offer that fits your request."
+      "ar": "الباقات المجمعة توفر خصم إطلاق تلقائيًا 15% مقارنة بشراء كل عنصر منفردًا.",
+      "en": "Curated combinations include an automatic 15% launch bundle discount compared to ordering items separately."
     },
     "individualConsultation": {
       "minutes30": 10,
-      "minutes60": 15
+      "regularMinutes30": 15,
+      "minutes60": 15,
+      "regularMinutes60": 20
     }
   },
   "services": [
     {
       "id": "profile_creation",
       "category": "profile",
-      "price": 30,
+      "price": 25,
       "featured": true,
       "title": {
         "ar": "إنشاء بروفايل احترافي",
@@ -386,12 +399,13 @@ window.KHUTWA_DATA = {
         "topic_trial_opening",
         "topic_positioning_niche",
         "topic_search_terms"
-      ]
+      ],
+      "regularPrice": 30
     },
     {
       "id": "profile_development",
       "category": "profile",
-      "price": 20,
+      "price": 15,
       "featured": true,
       "title": {
         "ar": "تطوير بروفايل موجود",
@@ -437,7 +451,8 @@ window.KHUTWA_DATA = {
         "topic_profile_audit",
         "topic_search_terms",
         "video_development"
-      ]
+      ],
+      "regularPrice": 20
     },
     {
       "id": "video_creation",
@@ -479,14 +494,15 @@ window.KHUTWA_DATA = {
         "en": "Installments are confirmed in the quote before production. Work starts only after scope and price are agreed."
       },
       "notes": {
-        "ar": "السعر القياسي $10 للفيديو. قد يصل إلى $12 في الحالات الموسعة بحسب المدة والتعقيد ونطاق المونتاج. الفيديو التعريفي الأساسي ضمن إنشاء البروفايل ليس فيديو إضافيًا منفصلًا.",
-        "en": "Standard launch price: $10 per video. Extended projects may be quoted at $12 depending on duration, complexity, and editing scope. Basic intro-video support included in Profile Creation is not an additional standalone video."
+        "ar": "سعر الإطلاق القياسي $10 بدل $15 (وقد يصل إلى $12 للحالات الموسعة قبل التسليم بعد الاتفاق كتابةً). الفيديو التعريفي الأساسي ضمن إنشاء البروفايل ليس فيديو إضافيًا منفصلًا.",
+        "en": "Standard launch price: $10 instead of $15 (extended projects up to $12 launch / $18 regular confirmed in writing). Basic intro-video support inside Profile Creation is not an additional standalone video."
       },
       "recommend": [
         "campaign_review",
         "topic_brand_message",
         "topic_referrals_communities"
-      ]
+      ],
+      "regularPrice": 15
     },
     {
       "id": "video_development",
@@ -533,7 +549,8 @@ window.KHUTWA_DATA = {
         "topic_brand_message",
         "video_creation",
         "campaign_review"
-      ]
+      ],
+      "regularPrice": 10
     },
     {
       "id": "video_bundle",
@@ -578,7 +595,8 @@ window.KHUTWA_DATA = {
         "topic_brand_message",
         "campaign_review",
         "topic_referrals_communities"
-      ]
+      ],
+      "regularPrice": 25
     },
     {
       "id": "individual_consultation",
@@ -608,8 +626,8 @@ window.KHUTWA_DATA = {
         ]
       },
       "delivery": {
-        "ar": "30 دقيقة بسعر إطلاق $10، أو 60 دقيقة بسعر إطلاق $15.",
-        "en": "30 minutes at a $10 launch price, or 60 minutes at a $15 launch price."
+        "ar": "30 دقيقة: $10 إطلاق (بدل $15) · 60 دقيقة: $15 إطلاق (بدل $20).",
+        "en": "30 min: $10 launch (was $15) · 60 min: $15 launch (was $20)."
       },
       "payment": {
         "ar": "تُحدد طريقة الدفع وموعد الجلسة بعد مراجعة الطلب والاتفاق.",
@@ -622,7 +640,8 @@ window.KHUTWA_DATA = {
       "recommend": [
         "topic_growth_goals",
         "topic_profile_audit"
-      ]
+      ],
+      "regularPrice": 15
     },
     {
       "id": "campaign_review",
@@ -671,7 +690,8 @@ window.KHUTWA_DATA = {
         "topic_referrals_communities",
         "topic_landing_tracking",
         "video_creation"
-      ]
+      ],
+      "regularPrice": null
     },
     {
       "id": "market_review",
@@ -718,7 +738,8 @@ window.KHUTWA_DATA = {
         "topic_platform_models",
         "topic_platform_requirements",
         "topic_platform_test"
-      ]
+      ],
+      "regularPrice": 10
     }
   ],
   "videoTypes": [
