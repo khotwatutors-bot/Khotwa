@@ -65,6 +65,7 @@
             <a class="button button-primary" href="#services" id="heroPrimary">اكتشف ما يناسبك <span>←</span></a>
             <button class="button button-glass" type="button" data-open-guide id="heroGuide">اسأل مرشد خُطوة</button>
           </div>
+          <div id="heroCapacityPill" class="hero-capacity-pill hidden"></div>
           <div class="hero-proof-row">
             <div><b>01</b><span data-ar="افهم احتياجك" data-en="Understand your need">افهم احتياجك</span></div>
             <div><b>02</b><span data-ar="اختر ما يناسبك" data-en="Choose what fits">اختر ما يناسبك</span></div>
@@ -103,6 +104,7 @@
           <div><span class="section-kicker" data-ar="خدمات خُطوة" data-en="KHUTWA SERVICES">خدمات خُطوة</span><h2 data-ar="اختَر الخدمة… واعرف بالضبط ماذا ستحصل عليه." data-en="Choose a service—and know exactly what it includes.">اختَر الخدمة… واعرف بالضبط ماذا ستحصل عليه.</h2></div>
           <p data-ar="كل خدمة لها نطاق وتسليمات وشروط واضحة. افتح التفاصيل قبل الإضافة إلى سلتك." data-en="Every service has a defined scope, deliverables, and terms. Review the details before adding it to your basket.">كل خدمة لها نطاق وتسليمات وشروط واضحة. افتح التفاصيل قبل الإضافة إلى سلتك.</p>
         </div>
+        <div class="batch-banner hidden" id="servicesBatchBanner" aria-live="polite"></div>
         <div class="services-grid" id="servicesGrid"></div>
         <div class="service-footnote" data-ar="جميع الأسعار بالدولار الأمريكي كسعر إطلاق. أي نطاق موسع أو طلب خاص يُسعّر ويُعتمد كتابةً قبل بدء العمل. لا تشمل الأسعار ميزانيات الإعلانات أو رسوم الناشرين." data-en="All prices are launch prices in USD. Extended scope or custom requests are quoted and confirmed in writing before work begins. Prices exclude advertising spend and publisher fees.">جميع الأسعار بالدولار الأمريكي كسعر إطلاق. أي نطاق موسع أو طلب خاص يُسعّر ويُعتمد كتابةً قبل بدء العمل. لا تشمل الأسعار ميزانيات الإعلانات أو رسوم الناشرين.</div>
         <div class="catalog-banner">
@@ -119,7 +121,7 @@
           <p data-ar="المكتبة مبنية من مسارات مقترحة وموضوعات مستقلة. اجمع موضوعات من أكثر من مسار، أو اطلب تركيبة خاصة بك." data-en="The library combines curated paths and individual topics. Mix topics from different paths or request a custom combination.">المكتبة مبنية من مسارات مقترحة وموضوعات مستقلة. اجمع موضوعات من أكثر من مسار، أو اطلب تركيبة خاصة بك.</p>
         </div>
         <div class="library-intro-band">
-          <div class="library-price"><span data-ar="سعر الإطلاق للموضوع الواحد" data-en="Launch price per topic">سعر الإطلاق للموضوع الواحد</span><strong>$3</strong><small data-ar="والعروض الخاصة متاحة عند جمع عدة موضوعات." data-en="Special offers are available for multi-topic selections.">والعروض الخاصة متاحة عند جمع عدة موضوعات.</small></div>
+          <div class="library-price" id="libraryPriceBox"><span data-ar="سعر الإطلاق للموضوع الواحد" data-en="Launch price per topic">سعر الإطلاق للموضوع الواحد</span><strong id="libraryPriceValue"><del class="old-price">$5</del> $3</strong><small data-ar="والعروض الخاصة متاحة عند جمع عدة موضوعات." data-en="Special offers are available for multi-topic selections.">والعروض الخاصة متاحة عند جمع عدة موضوعات.</small></div>
           <div class="library-method"><b data-ar="كيف تعمل المكتبة؟" data-en="How the library works">كيف تعمل المكتبة؟</b><p data-ar="تختار الموضوعات، ونعدّ كل موضوع كمادة مصورة مستقلة، ثم نرتب الموضوعات التي اخترتها في جلسة مترابطة ونجهز المونتاج والتسليم وفق نطاق الطلب. لا تحتاج إلى شراء مسار كامل أو موضوعات لا تناسبك." data-en="Choose topics. Each topic is prepared as a separate recorded learning unit, then your selected units are arranged into a coherent session and edited for delivery. You do not need to buy a full path or unrelated topics.">تختار الموضوعات، ونعدّ كل موضوع كمادة مصورة مستقلة، ثم نرتب الموضوعات التي اخترتها في جلسة مترابطة ونجهز المونتاج والتسليم وفق نطاق الطلب. لا تحتاج إلى شراء مسار كامل أو موضوعات لا تناسبك.</p></div>
         </div>
         <div class="library-controls">
@@ -146,6 +148,7 @@
         <div class="discount-note"><span>✦</span><p data-ar="فيه خصومات خاصة على بعض التجميعات. لا يوجد خصم تلقائي على كل سلة؛ فريق خُطوة يراجع مكونات طلبك ويؤكد العرض قبل موافقتك." data-en="Special discounts may apply to selected combinations. Discounts are not automatically applied to every basket; Khutwa reviews your request and confirms any offer before you accept.">فيه خصومات خاصة على بعض التجميعات. لا يوجد خصم تلقائي على كل سلة؛ فريق خُطوة يراجع مكونات طلبك ويؤكد العرض قبل موافقتك.</p></div>
         <div class="cart-panel" id="cartPanel">
           <div class="cart-head"><div><span class="section-kicker" data-ar="طلبك" data-en="YOUR REQUEST">طلبك</span><h3 data-ar="سلة خدماتك وموضوعاتك" data-en="Your services and topics basket">سلة خدماتك وموضوعاتك</h3><p data-ar="اجمع أكثر من خدمة وموضوع في طلب واحد." data-en="Combine multiple services and topics in one request.">اجمع أكثر من خدمة وموضوع في طلب واحد.</p></div><button class="text-button" id="clearBasket" type="button" data-ar="إفراغ السلة" data-en="Clear basket">إفراغ السلة</button></div>
+          <div class="ref-banner hidden" id="referralBanner"></div>
           <div class="cart-empty" id="cartEmpty" data-ar="لسه ما اخترتش حاجة. ابدأ بإضافة خدمة أو موضوع يعبر عن احتياجك." data-en="Your basket is empty. Add a service or topic that fits your needs.">لسه ما اخترتش حاجة. ابدأ بإضافة خدمة أو موضوع يعبر عن احتياجك.</div>
           <div class="cart-items" id="cartItems"></div>
           <div class="basket-recommendations" id="basketRecommendations"></div>
@@ -234,6 +237,7 @@
             <form id="requestForm" class="request-form" method="dialog" novalidate>
             <div aria-hidden="true" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;opacity:0;pointer-events:none"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
             <div class="form-title-row"><div><span class="section-kicker" data-ar="نموذج الطلب الموحد" data-en="UNIFIED REQUEST FORM">نموذج الطلب الموحد</span><h3 data-ar="معلوماتك واحتياجك" data-en="Your details and needs">معلوماتك واحتياجك</h3></div><span class="form-step-label" data-ar="الخطوة 1 من 1" data-en="Step 1 of 1">الخطوة 1 من 1</span></div>
+            <div id="requestBatchNote" class="batch-banner hidden" style="margin-bottom:14px"></div>
             <div id="requestSelected" class="request-selected"><span data-ar="اختيارات السلة" data-en="Basket selection">اختيارات السلة</span><div id="requestSelectedItems" data-ar="لم تتم إضافة خدمات بعد." data-en="No services added yet.">لم تتم إضافة خدمات بعد.</div></div>
             <div class="form-section-label" data-ar="بيانات التواصل" data-en="CONTACT DETAILS">بيانات التواصل</div>
             <div class="form-grid">
