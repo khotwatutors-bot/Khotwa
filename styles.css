@@ -19,3 +19,23 @@
 .basket-recommendations{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:13px}.basket-recommendation{border:1px solid rgba(160,146,255,.18);background:rgba(117,98,210,.07);border-radius:13px;padding:11px}.basket-recommendation b{display:block;font-size:10px}.basket-recommendation p{margin:4px 0 8px;color:var(--muted);font-size:9px;line-height:1.7}.basket-recommendation button{border:0;background:transparent;color:var(--mint);font-size:9px;font-weight:900;padding:0}.basket-recommendation small{display:block;color:#a9b5d8;font-size:8px;margin-bottom:5px}@media(max-width:650px){.basket-recommendations{grid-template-columns:1fr}}
 
 #analyticsConsent[hidden]{display:none!important}
+
+.old-price{text-decoration:line-through;color:#8e9bc2;font-size:.68em;font-weight:600;margin-inline-end:6px}
+.batch-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 18px;margin-bottom:20px;border:1px solid rgba(159,241,223,.24);background:rgba(21,39,76,.65);border-radius:16px;font-size:12px}
+.batch-banner.overflow{border-color:rgba(244,209,141,.34);background:rgba(58,47,25,.28)}
+.batch-dot{width:9px;height:9px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(159,241,223,.14);flex-shrink:0}
+.batch-banner.overflow .batch-dot{background:var(--gold);box-shadow:0 0 0 4px rgba(244,209,141,.16)}
+.batch-banner-main{display:flex;align-items:center;gap:11px;flex:1}
+.batch-banner-main b{display:block;font-size:12px;color:#fff}
+.batch-banner-main small{display:block;font-size:10px;color:var(--muted)}
+.batch-badge{padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:10px;font-weight:800;white-space:nowrap;color:#e5ebff}
+.hero-capacity-pill{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:7px 13px;border-radius:12px;background:rgba(159,241,223,.08);border:1px solid rgba(159,241,223,.22);font-size:11px;color:#dffbf3;font-weight:700}
+.hero-capacity-pill.overflow{background:rgba(244,209,141,.1);border-color:rgba(244,209,141,.28);color:#fde8ba}
+.package-price-row{display:flex;align-items:baseline;gap:8px;margin:8px 0 10px;flex-wrap:wrap}
+.package-price-row strong{font-size:24px;color:#fff}
+.savings-pill{display:inline-block;padding:3px 9px;border-radius:999px;background:rgba(159,241,223,.13);border:1px solid rgba(159,241,223,.28);color:var(--mint);font-size:10px;font-weight:800}
+.ref-banner{padding:11px 14px;border-radius:13px;border:1px solid rgba(159,241,223,.3);background:rgba(159,241,223,.08);color:#e4fcf5;font-size:11px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.share-link-btn{background:transparent;border:1px solid var(--line);color:#bcc8eb;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:700}
+.share-link-btn:hover{border-color:#9b8cff;color:#fff}
+.deep-highlight{border-color:#9b8cff!important;box-shadow:0 0 0 3px rgba(155,140,255,.25),0 18px 42px rgba(0,0,0,.35)!important}
+@media(max-width:760px){.batch-banner{flex-direction:column;align-items:flex-start}}
