@@ -38,6 +38,137 @@
   let lastRequest = null;
   let advisorStarted = false;
   let marketState = null;
+  const ATTR_KEY = 'khutwa_attribution';
+  let liveConfig = null;
+  let deepLinkApplied = false;
+
+  function captureAttribution() {
+    let existing = {};
+    try { existing = JSON.parse(sessionStorage.getItem(ATTR_KEY) || '{}'); } catch {}
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const next = {
+        utmSource: (p.get('utm_source') || existing.utmSource || '').trim().slice(0, 100),
+        utmMedium: (p.get('utm_medium') || existing.utmMedium || '').trim().slice(0, 100),
+        utmCampaign: (p.get('utm_campaign') || existing.utmCampaign || '').trim().slice(0, 140),
+        referralCode: (p.get('ref') || existing.referralCode || '').trim().toUpperCase().slice(0, 40),
+        landingPath: existing.landingPath || (location.pathname + location.search).slice(0, 240)
+      };
+      try { sessionStorage.setItem(ATTR_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    } catch { return existing; }
+  }
+  const attributionState = captureAttribution();
+
+  function isLaunchActiveClient() {
+    if (liveConfig?.pricing) return Boolean(liveConfig.pricing.launchActive);
+    const ends = DATA.pricing?.launchEnds || '2027-05-26';
+    const today = new Date().toISOString().slice(0, 10);
+    return today <= ends;
+  }
+
+  function activeTopicPrice() {
+    if (liveConfig?.pricing) return Number(liveConfig.pricing.topicPrice || 3);
+    const reg = Number(DATA.pricing?.topicRegularPrice || 5);
+    const launch = Number(DATA.pricing?.topicPrice || 3);
+    return isLaunchActiveClient() ? launch : reg;
+  }
+
+  function regularTopicPrice() {
+    if (liveConfig?.pricing) return Number(liveConfig.pricing.topicRegularPrice || 5);
+    return Number(DATA.pricing?.topicRegularPrice || 5);
+  }
+
+  function servicePricePair(service, duration = '30') {
+    if (!service) return { active: null, regular: null };
+    if (service.id === 'individual_consultation') {
+      const key = String(duration) === '60' ? 'consultation_60' : 'consultation_30';
+      if (liveConfig?.pricing?.services?.[key]) return liveConfig.pricing.services[key];
+      const ic = DATA.pricing?.individualConsultation || {};
+      const launch = key === 'consultation_60' ? (ic.minutes60 ?? 15) : (ic.minutes30 ?? 10);
+      const regular = key === 'consultation_60' ? (ic.regularMinutes60 ?? 20) : (ic.regularMinutes30 ?? 15);
+      return { active: isLaunchActiveClient() ? launch : regular, regular, launch };
+    }
+    if (liveConfig?.pricing?.services?.[service.id]) return liveConfig.pricing.services[service.id];
+    const launch = service.price;
+    const regular = service.regularPrice ?? service.price;
+    return { active: isLaunchActiveClient() ? launch : regular, regular, launch };
+  }
+
+  function activePackagePricing(pkg) {
+    if (!pkg) return { active: 0, regularSum: 0, savingsVsRegular: 0 };
+    if (liveConfig?.pricing?.packages?.[pkg.id]) return liveConfig.pricing.packages[pkg.id];
+    const topicP = activeTopicPrice();
+    const topicReg = regularTopicPrice();
+    let activeSum = 0;
+    let regularSum = 0;
+    (pkg.items || []).forEach(id => {
+      if (id.startsWith('topic_')) { activeSum += topicP; regularSum += topicReg; }
+      else {
+        const pair = servicePricePair(getService(id));
+        activeSum += pair.active || 0;
+        regularSum += pair.regular || 0;
+      }
+    });
+    const pct = Number(DATA.pricing?.packageDiscountPercent ?? 15);
+    const active = Math.round(activeSum * (1 - pct / 100));
+    return { active, itemsSum: activeSum, regularSum, savingsVsRegular: Math.max(0, regularSum - active) };
+  }
+
+  function renderBatchBanners() {
+    const batch = liveConfig?.batch || {
+      activeWeek: 1,
+      weeklyCapacity: DATA.pricing?.weeklyCapacity || 10,
+      seatsUsed: 0,
+      seatsRemaining: DATA.pricing?.weeklyCapacity || 10,
+      week1Full: false,
+      showCapacityBar: DATA.pricing?.showCapacityBar !== false,
+      showExactSeatsCount: DATA.pricing?.showExactSeatsCount !== false
+    };
+    const show = batch.showCapacityBar !== false;
+    const exact = batch.showExactSeatsCount !== false;
+    const heroPill = $('#heroCapacityPill');
+    const svcBanner = $('#servicesBatchBanner');
+    const reqBanner = $('#requestBatchNote');
+    const verifiedCount = liveConfig?.publicVerifiedCount;
+
+    if (!show) {
+      [heroPill, svcBanner, reqBanner].forEach(el => el && el.classList.add('hidden'));
+      return;
+    }
+
+    const weekLabelAr = batch.activeWeek === 1 ? 'مجموعة الأسبوع الحالي (المجموعة 1)' : `المجموعة ${batch.activeWeek} (الأسبوع القادم)`;
+    const weekLabelEn = batch.activeWeek === 1 ? 'Current Week Cohort (Batch 1)' : `Batch ${batch.activeWeek} (Next Open Week)`;
+    const seatsTextAr = exact ? `متاح ${batch.seatsRemaining} من ${batch.weeklyCapacity} مقاعد مؤكدة` : 'الحجز مفتوح ضمن الطاقة الاستيعابية الأسبوعية';
+    const seatsTextEn = exact ? `${batch.seatsRemaining} of ${batch.weeklyCapacity} confirmed slots open` : 'Accepting confirmed orders for the open weekly cohort';
+    const verifiedTag = verifiedCount ? (language === 'ar' ? ` · ✓ ${verifiedCount} طلب مكتمل` : ` · ✓ ${verifiedCount} completed`) : '';
+
+    if (heroPill) {
+      heroPill.classList.remove('hidden');
+      heroPill.classList.toggle('overflow', Boolean(batch.week1Full));
+      heroPill.textContent = language === 'ar' ? `${weekLabelAr} · ${seatsTextAr}${verifiedTag}` : `${weekLabelEn} · ${seatsTextEn}${verifiedTag}`;
+    }
+
+    const bannerHtml = `<div class="batch-banner-main"><span class="batch-dot"></span><div><b>${escapeHTML(language === 'ar' ? weekLabelAr + ' — ' + seatsTextAr : weekLabelEn + ' — ' + seatsTextEn)}</b><small>${escapeHTML(language === 'ar' ? 'نحدّد عدد المقاعد المؤكدة أسبوعيًا لضمان جودة التنفيذ الفردي؛ موضوعات المكتبة ودراسة الحالة المجانية لا تستهلك مقعدًا من طاقة التنفيذ.' : 'Weekly confirmed service slots are capped to protect 1-on-1 quality; library topics and free case studies do not consume a production slot.')}</small></div></div><span class="batch-badge">${escapeHTML(language === 'ar' ? (isLaunchActiveClient() ? 'أسعار الإطلاق فعالة' : 'الأسعار الأساسية') : (isLaunchActiveClient() ? 'Launch Pricing Active' : 'Standard Pricing'))}${escapeHTML(verifiedTag)}</span>`;
+
+    [svcBanner, reqBanner].forEach(el => {
+      if (!el) return;
+      el.classList.remove('hidden');
+      el.classList.toggle('overflow', Boolean(batch.week1Full));
+      el.innerHTML = bannerHtml;
+    });
+  }
+
+  function renderReferralBanner() {
+    const el = $('#referralBanner');
+    if (!el) return;
+    const ref = liveConfig?.referral;
+    const code = ref?.code || attributionState.referralCode;
+    if (!code || !ref) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    el.innerHTML = `<span>✦ ${escapeHTML(language === 'ar' ? `تم ربط طلبك بكود الإحالة ${ref.code}${ref.discountPercent > 0 ? ` (خصم إضافي ${ref.discountPercent}% يُؤكد عند المراجعة)` : ''}` : `Referral code ${ref.code} applied${ref.discountPercent > 0 ? ` (${ref.discountPercent}% partner discount confirmed on review)` : ''}`)}</span>`;
+  }
+
 
   function t(value) {
     if (value && typeof value === 'object') return value[language] || value.ar || value.en || '';
@@ -126,27 +257,40 @@
   }
   function renderServices() {
     const host = $('#servicesGrid');
+    const launchActive = isLaunchActiveClient();
     host.innerHTML = DATA.services.map((service, index) => {
       const includes = (service.includes?.[language] || service.includes?.ar || []).slice(0, 4);
-      const priceLabel = service.price === 0
-        ? `<div class="service-price">${language==='ar'?'مجاني':'Free'}</div>`
-        : service.price == null
+      const pair = servicePricePair(service, '30');
+      const pair60 = service.id === 'individual_consultation' ? servicePricePair(service, '60') : null;
+      const oldHtml = (launchActive && pair.regular != null && pair.active !== pair.regular)
+        ? `<del class="old-price">$${pair.regular}</del>` : '';
+      const priceLabel = pair.active === 0
+        ? `<div class="service-price">${oldHtml}${language==='ar'?'مجاني':'Free'}${launchActive && pair.regular ? `<small>${escapeHTML(t(DATA.pricing.launchLabel))}</small>` : ''}</div>`
+        : pair.active == null
         ? `<div class="service-price quote">${language==='ar'?'عرض سعر حسب الاحتياج':'Quote based on scope'}</div>`
         : service.id === 'individual_consultation'
-          ? `<div class="service-price">$10–15<small>${escapeHTML(t(DATA.pricing.launchLabel))}</small></div>`
-          : `<div class="service-price">${money(service.price)}<small>${escapeHTML(t(DATA.pricing.launchLabel))}</small></div>`;
+          ? `<div class="service-price">${launchActive?'<del class="old-price">$15–20</del>':''}$${pair.active}–${pair60.active}<small>${escapeHTML(launchActive ? t(DATA.pricing.launchLabel) : t(DATA.pricing.regularLabel))}</small></div>`
+          : `<div class="service-price">${oldHtml}${money(pair.active)}<small>${escapeHTML(launchActive ? t(DATA.pricing.launchLabel) : t(DATA.pricing.regularLabel))}</small></div>`;
       const payment = `<div class="detail-meta"><b>${language==='ar'?'المدة':'Timeline'}:</b> ${escapeHTML(t(service.delivery))}</div><div class="detail-meta"><b>${language==='ar'?'الدفع':'Payment'}:</b> ${escapeHTML(t(service.payment))}</div><div class="detail-meta">${escapeHTML(t(service.notes))}</div>`;
-      return `<article class="service-card ${service.featured?'featured':''}">
+      return `<article class="service-card ${service.featured?'featured':''}" data-service-card="${escapeHTML(service.id)}">
         <div class="service-card-top"><div><div class="service-icon">${['▣','✧','▶','✎','◎','↗','⌕'][index%7]}</div><h3>${escapeHTML(t(service.title))}</h3></div>${priceLabel}</div>
         <p class="service-short">${escapeHTML(t(service.short))}</p>
         <ul class="service-mini-list">${includes.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>
         <details class="service-details"><summary>${language==='ar'?'تفاصيل الخدمة والتسليمات':'Full scope and deliverables'}</summary><div class="details-content"><ul>${(service.includes?.[language]||service.includes.ar).map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>${payment}</div></details>
-        <div class="service-action">${service.id==='individual_consultation'?`<select class="consultation-duration" aria-label="${language==='ar'?'مدة الجلسة':'Session duration'}"><option value="30">${language==='ar'?'30 دقيقة · $10':'30 min · $10'}</option><option value="60">${language==='ar'?'60 دقيقة · $15':'60 min · $15'}</option></select>`:''}<small>${service.price===0?(language==='ar'?'مجاني ولا يلزمك شراء شيء':'Free, no purchase required'):service.price==null?(language==='ar'?'السعر بعد مراجعة النطاق':'Price after scope review'):(language==='ar'?'سعر إطلاق':'Launch price')}</small><button class="button button-soft" type="button" data-add-service="${escapeHTML(service.id)}">${language==='ar'?'أضف إلى السلة':'Add to basket'}</button></div>
+        <div class="service-action">${service.id==='individual_consultation'?`<select class="consultation-duration" aria-label="${language==='ar'?'مدة الجلسة':'Session duration'}"><option value="30">${language==='ar'?`30 دقيقة · $${pair.active}`:`30 min · $${pair.active}`}</option><option value="60">${language==='ar'?`60 دقيقة · $${pair60.active}`:`60 min · $${pair60.active}`}</option></select>`:''}<button class="share-link-btn" type="button" data-share-link="service:${escapeHTML(service.id)}" title="${language==='ar'?'نسخ رابط الخدمة المباشر':'Copy direct link'}">↗</button><button class="button button-soft" type="button" data-add-service="${escapeHTML(service.id)}">${language==='ar'?'أضف إلى السلة':'Add to basket'}</button></div>
       </article>`;
     }).join('');
   }
   function renderPaths() {
     const host = $('#pathGrid');
+    const topicP = activeTopicPrice();
+    const regTopicP = regularTopicPrice();
+    const priceEl = $('#libraryPriceValue');
+    if (priceEl) {
+      priceEl.innerHTML = (isLaunchActiveClient() && regTopicP > topicP)
+        ? `<del class="old-price">$${regTopicP}</del> $${topicP}`
+        : `$${topicP}`;
+    }
     const search = ($('#topicSearch').value || '').trim().toLocaleLowerCase();
     const visiblePaths = DATA.paths.filter(path => {
       if (activeTopicFilter !== 'all' && path.category !== activeTopicFilter) return false;
@@ -157,9 +301,9 @@
     host.innerHTML = visiblePaths.map((path, index) => {
       const topicsMarkup = path.topics.map(topic => {
         const selected = basket.some(item => item.type==='topic' && item.id===topic.id);
-        return `<div class="topic-row"><input type="checkbox" id="select-${escapeHTML(topic.id)}" data-topic-check="${escapeHTML(topic.id)}" ${selected?'checked':''}><label for="select-${escapeHTML(topic.id)}">${escapeHTML(t(topic))}<small>${escapeHTML(t(topic.outcome))}</small></label><button type="button" data-add-topic="${escapeHTML(topic.id)}">${money(DATA.pricing.topicPrice)}</button></div>`;
+        return `<div class="topic-row" data-topic-row="${escapeHTML(topic.id)}"><input type="checkbox" id="select-${escapeHTML(topic.id)}" data-topic-check="${escapeHTML(topic.id)}" ${selected?'checked':''}><label for="select-${escapeHTML(topic.id)}">${escapeHTML(t(topic))}<small>${escapeHTML(t(topic.outcome))}</small></label><button type="button" data-add-topic="${escapeHTML(topic.id)}">${money(topicP)}</button></div>`;
       }).join('');
-      return `<article class="path-card" data-category="${path.category}"><div class="path-card-head"><span class="path-number">${String(index+1).padStart(2,'0')}</span><div><h3>${escapeHTML(t(path.title))}</h3><p>${escapeHTML(t(path.short))}</p></div></div><div class="path-topics">${topicsMarkup}</div><div class="path-card-foot"><small>${path.topics.length} ${language==='ar'?'موضوعات':'topics'} · ${money(DATA.pricing.topicPrice*path.topics.length)} ${language==='ar'?'قبل أي عرض خاص':'before any special offer'}</small><button class="button button-outline" type="button" data-add-path="${escapeHTML(path.id)}">${language==='ar'?'أضف المسار':'Add path'}</button></div></article>`;
+      return `<article class="path-card" data-category="${path.category}"><div class="path-card-head"><span class="path-number">${String(index+1).padStart(2,'0')}</span><div><h3>${escapeHTML(t(path.title))}</h3><p>${escapeHTML(t(path.short))}</p></div></div><div class="path-topics">${topicsMarkup}</div><div class="path-card-foot"><small>${path.topics.length} ${language==='ar'?'موضوعات':'topics'} · ${money(topicP*path.topics.length)}</small><button class="button button-outline" type="button" data-add-path="${escapeHTML(path.id)}">${language==='ar'?'أضف المسار':'Add path'}</button></div></article>`;
     }).join('');
     $('#topicEmpty').classList.toggle('hidden', visiblePaths.length > 0);
   }
@@ -171,7 +315,9 @@
         const topic = getTopic(id);
         return service ? t(service.title) : topic ? t(topic) : id;
       });
-      return `<article class="package-card ${index===1?'recommended':''}"><span class="package-label">${index===1?(language==='ar'?'اختيار مقترح':'Suggested choice'):(language==='ar'?'تجميعة مقترحة':'Suggested combination')}</span><h3>${escapeHTML(t(pkg.title))}</h3><p>${escapeHTML(t(pkg.audience))}</p><div class="package-items">${names.map(name=>`<span>${escapeHTML(name)}</span>`).join('')}</div><div class="package-quote">${language==='ar'?'عرض خاص حسب مكونات طلبك':'Custom offer based on your selection'}</div><button class="button button-outline" type="button" data-add-package="${escapeHTML(pkg.id)}">${language==='ar'?'أضف التجميعة إلى السلة':'Add combination to basket'}</button></article>`;
+      const pp = activePackagePricing(pkg);
+      const saveText = pp.savingsVsRegular > 0 ? (language==='ar'?`توفير $${pp.savingsVsRegular}`:`Save $${pp.savingsVsRegular}`) : '';
+      return `<article class="package-card ${index===1?'recommended':''}" data-package-card="${escapeHTML(pkg.id)}"><span class="package-label">${index===1?(language==='ar'?'اختيار مقترح':'Suggested choice'):(language==='ar'?'تجميعة مقترحة':'Suggested combination')}</span><h3>${escapeHTML(t(pkg.title))}</h3><div class="package-price-row"><strong>$${pp.active}</strong>${pp.regularSum > pp.active ? `<del class="old-price">$${pp.regularSum}</del>` : ''}${saveText ? `<span class="savings-pill">${escapeHTML(saveText)}</span>` : ''}</div><p>${escapeHTML(t(pkg.audience))}</p><div class="package-items">${names.map(name=>`<span>${escapeHTML(name)}</span>`).join('')}</div><div style="display:flex;gap:8px;align-items:center;margin-top:auto"><button class="share-link-btn" type="button" data-share-link="package:${escapeHTML(pkg.id)}" title="${language==='ar'?'نسخ رابط الباقة':'Copy link'}">↗</button><button class="button button-outline" style="flex:1" type="button" data-add-package="${escapeHTML(pkg.id)}">${language==='ar'?'أضف التجميعة إلى السلة':'Add combination to basket'}</button></div></article>`;
     }).join('');
   }
   function basketLabel(entry) {
@@ -180,14 +326,21 @@
     if (item.kind==='service') return t(item.data.title) + (entry.id==='individual_consultation' ? (language==='ar' ? ` (${entry.duration==='60'?'60':'30'} دقيقة)` : ` (${entry.duration==='60'?'60':'30'} min)`) : '');
     if (item.kind==='topic') return t(item.data);
     if (item.kind==='custom') return language==='ar'?'طلب موضوع مخصص':'Custom topic request';
-    if (item.kind==='package') return t(item.data.title);
+    if (item.kind==='package') {
+      const pkg = DATA.packages.find(p => p.id === entry.id) || entry;
+      return t(pkg.title);
+    }
     return '';
   }
   function basketPrice(entry) {
     const item = getBasketItem(entry);
     if (!item) return null;
-    if (item.kind==='service') { if(entry.id==='individual_consultation') return entry.duration==='60'?15:10; return item.data.price; }
-    if (item.kind==='topic') return DATA.pricing.topicPrice;
+    if (item.kind==='service') return servicePricePair(item.data, entry.duration || '30').active;
+    if (item.kind==='topic') return activeTopicPrice();
+    if (item.kind==='package') {
+      const pkg = DATA.packages.find(p => p.id === entry.id);
+      return pkg ? activePackagePricing(pkg).active : null;
+    }
     return null;
   }
   const CROSS_SELL = {
@@ -278,25 +431,27 @@
   }
   function addPackage(packageId) {
     const pkg = DATA.packages.find(item=>item.id===packageId); if(!pkg) return;
-    pkg.items.forEach(id=>{
-      if(getService(id)) { if(!basket.some(item=>item.type==='service'&&item.id===id)) basket.push({type:'service',id}); }
-      else if(getTopic(id)) { if(!basket.some(item=>item.type==='topic'&&item.id===id)) basket.push({type:'topic',id}); }
-    });
-    if(!basket.some(item=>item.type==='package'&&item.id===pkg.id)) basket.push({type:'package',id:pkg.id,title:pkg.title,qty:1});
+    if (basket.some(item=>item.type==='package'&&item.id===pkg.id)) {
+      showToast(language==='ar'?'الباقة موجودة بالفعل في السلة.':'This package is already in your basket.'); return;
+    }
+    const pkgSet = new Set(pkg.items || []);
+    basket = basket.filter(item => !((item.type==='service' || item.type==='topic') && pkgSet.has(item.id)));
+    basket.push({type:'package',id:pkg.id,title:pkg.title,qty:1});
     trackEvent('add_to_cart',{item_id:`package:${packageId}`});
     renderBasket();
-    showToast(language==='ar'?'أضفنا مكونات التجميعة. اسأل عن عرض الباقة.':'Combination added. Ask about your package offer.');
+    showToast(language==='ar'?'تمت إضافة الباقة بسعر الخصم التلقائي!':'Package added with bundle discount!');
     $('#cartPanel').scrollIntoView({behavior:'smooth',block:'center'});
   }
   function currentCategories() {
-    const serviceIds = basket.filter(x=>x.type==='service').map(x=>x.id);
+    const pkgItemIds = basket.filter(x=>x.type==='package').flatMap(x=>(DATA.packages.find(p=>p.id===x.id)?.items||[]));
+    const serviceIds = [...basket.filter(x=>x.type==='service').map(x=>x.id), ...pkgItemIds.filter(id=>getService(id))];
     const services = serviceIds.map(getService).filter(Boolean);
     return {
       profile:services.some(x=>x.category==='profile'),
       video:services.some(x=>x.category==='video'),
       market:services.some(x=>x.category==='market') || serviceIds.includes('profile_creation'),
       promotion:services.some(x=>x.category==='promotion'),
-      topics:basket.some(x=>x.type==='topic'||x.type==='custom')
+      topics:basket.some(x=>x.type==='topic'||x.type==='custom') || pkgItemIds.some(id=>id.startsWith('topic_'))
     };
   }
   function updateConditionalFields() {
@@ -324,7 +479,7 @@
     if(keep) el.value=keep;
   }
   function renderAll() {
-    renderServices(); renderPaths(); renderPackages(); renderBasket(); renderPortfolio(); renderFaq(); renderVision(); renderVideoTypes();
+    renderServices(); renderPaths(); renderPackages(); renderBasket(); renderBatchBanners(); renderReferralBanner(); renderPortfolio(); renderFaq(); renderVision(); renderVideoTypes();
     $('#heroEyebrow').textContent=t(DATA.hero.eyebrow);
     $('#heroTitle').textContent=t(DATA.hero.title);
     $('#heroSubtitle').textContent=t(DATA.hero.subtitle);
@@ -346,7 +501,7 @@
   /* ---------- Platform finder v2 (rules based, preliminary, no live data) ---------- */
   const MARKET_PLATFORMS = [
     { id:'preply', name:'Preply', domain:'preply.com', fit:{language:3,academic:2,skill:1,quran:1}, note:{ar:'سوق دروس خاصة معروف، وأقوى حضورًا في اللغات.',en:'A well-known private-lesson marketplace, strongest for languages.'} },
-    { id:'italki', name:'italki', domain:'italki.com', fit:{language:3,academic:0,skill:0,quran:0}, note:{ar:'سوق متخصص أساسًا في تعلّم اللغات.',en:'A marketplace focused mainly on language learning.'} },
+    { id:'italki', name:'italki', domain:'italki.com', fit:{language:3,academic:0,skill:0,quran:0}, note:{ar:'سوق متخصص أساسًا في تعلّم اللغات.',en:'A marketplace focused mainly at language learning.'} },
     { id:'verbling', name:'Verbling', domain:'verbling.com', fit:{language:3,academic:0,skill:0,quran:0}, note:{ar:'منصة موجهة للغات.',en:'A platform aimed at language learning.'} },
     { id:'amazingtalker', name:'AmazingTalker', domain:'amazingtalker.com', fit:{language:3,academic:1,skill:1,quran:0}, note:{ar:'منصة لغات حضورها قوي بين متعلمين من آسيا.',en:'A language platform with a strong presence among learners in Asia.'} },
     { id:'superprof', name:'Superprof', domain:'superprof.com', fit:{language:2,academic:3,skill:3,quran:1}, note:{ar:'دليل مدرسين لمواد متنوعة.',en:'A tutor directory covering many subjects.'} },
@@ -458,7 +613,7 @@
       promotion:{budget:fields.campaignBudget||'',channels:fields.preferredChannel||''},
       selectedItems:selection,selectedTopics:selection.filter(x=>x.type==='topic').map(x=>x.label),
       customTopics:fields.customTopics||basket.filter(x=>x.type==='custom').map(x=>x.text).join('\n'),
-      goal:fields.goal||'',consent:$('#requestConsent').checked,website:fields.website||''
+      goal:fields.goal||'',consent:$('#requestConsent').checked,website:fields.website||'',attribution:attributionState
     };
   }
   async function submitRequest(event) {
@@ -912,6 +1067,7 @@
   }
 
   document.addEventListener('click', event => {
+    const shareBtn=event.target.closest('[data-share-link]'); if(shareBtn){const [kind,id]=shareBtn.dataset.shareLink.split(':');const u=new URL(location.origin+location.pathname);u.searchParams.set(kind,id);u.searchParams.set('lang',language);navigator.clipboard?.writeText(u.toString()).then(()=>showToast(language==='ar'?'تم نسخ الرابط المباشر للمشاركة!':'Direct link copied!')).catch(()=>showToast(u.toString()));return;}
     const addService=event.target.closest('[data-add-service]'); if(addService){const duration=addService.closest('.service-card')?.querySelector('.consultation-duration')?.value||'30';addItem('service',addService.dataset.addService,{duration});return;}
     const addTopic=event.target.closest('[data-add-topic]'); if(addTopic){addItem('topic',addTopic.dataset.addTopic);return;}
     const addPathBtn=event.target.closest('[data-add-path]');if(addPathBtn){addPath(addPathBtn.dataset.addPath);return;}
@@ -970,5 +1126,46 @@
   $$('img[data-fallback="banner"]').forEach(img=>img.addEventListener('error',()=>img.closest('.hero-image-frame')?.classList.add('image-failed'),{once:true}));
   // Correct the image-fallback state if an asset is already unavailable when the listener is registered.
   $$('img[data-fallback]').forEach(img=>{if(img.complete&&img.naturalWidth===0)img.dispatchEvent(new Event('error'));});
+  function handleDeepLinks() {
+    if (deepLinkApplied) return;
+    deepLinkApplied = true;
+    try {
+      const p = new URLSearchParams(location.search);
+      const svc = p.get('service');
+      const pkg = p.get('package');
+      const top = p.get('topic');
+      let target = null;
+      if (svc) target = document.querySelector(`[data-service-card="${CSS.escape(svc)}"]`);
+      else if (pkg) target = document.querySelector(`[data-package-card="${CSS.escape(pkg)}"]`);
+      else if (top) target = document.querySelector(`[data-topic-row="${CSS.escape(top)}"]`);
+      if (target) {
+        target.classList.add('deep-highlight');
+        const det = target.querySelector('details.service-details');
+        if (det) det.open = true;
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 180);
+      }
+    } catch {}
+  }
+
+  async function loadPublicConfig() {
+    try {
+      const u = new URL('/api/public-config', location.origin);
+      if (attributionState.referralCode) u.searchParams.set('ref', attributionState.referralCode);
+      const r = await fetch(u.toString(), { cache: 'no-store' });
+      const data = await r.json().catch(() => null);
+      if (r.ok && data?.ok) {
+        liveConfig = data;
+        renderServices();
+        renderPaths();
+        renderPackages();
+        renderBasket();
+        renderBatchBanners();
+        renderReferralBanner();
+      }
+    } catch {}
+  }
+
   updateStaticLanguage();
+  handleDeepLinks();
+  loadPublicConfig();
 })();
