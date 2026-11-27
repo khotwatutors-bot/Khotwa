@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS requests (
   utm_campaign TEXT,
   referral_code TEXT,
   ai_notes_json TEXT,
-  delivery_links_json TEXT
+  delivery_links_json TEXT,
+  case_study_json TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_requests_created_at ON requests(created_at DESC);
@@ -65,6 +66,12 @@ CREATE TABLE IF NOT EXISTS admin_login_limits (
 CREATE TABLE IF NOT EXISTS public_request_limits (
   ip_hash TEXT PRIMARY KEY,
   submissions INTEGER NOT NULL DEFAULT 0,
+  window_start INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public_ai_limits (
+  ip_hash TEXT PRIMARY KEY,
+  calls INTEGER NOT NULL DEFAULT 0,
   window_start INTEGER NOT NULL
 );
 
@@ -112,3 +119,20 @@ CREATE TABLE IF NOT EXISTS client_access_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_access_tokens_request ON client_access_tokens(request_id);
+
+CREATE TABLE IF NOT EXISTS marketing_posts (
+  id TEXT PRIMARY KEY,
+  target_key TEXT,
+  platform TEXT NOT NULL,
+  angle TEXT,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  cta_url TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
+  scheduled_date TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_marketing_posts_status ON marketing_posts(status);
+
