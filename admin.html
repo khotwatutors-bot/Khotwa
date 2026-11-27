@@ -113,13 +113,41 @@ tr[data-id].selected{background:#1b2d52}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:1020px){.cols,.three{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:650px){.wrap{padding:12px}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.info,.tpl-grid{grid-template-columns:minmax(0,1fr)}.panel{padding:14px}.tab-btn{font-size:12px;padding:7px 10px}}
+.brand-mark,.login-logo{overflow:hidden;position:relative;background:#0a1229;border:1px solid rgba(160,175,255,.25)}
+.brand-logo-img{width:100%;height:100%;object-fit:contain;display:block;padding:3px}
+.brand-fallback-txt{display:none;width:100%;height:100%;place-items:center;font-weight:900;color:#fff}
+.image-failed .brand-logo-img{display:none}
+.image-failed .brand-fallback-txt{display:grid}
+.cs-book{border:2px solid rgba(245,158,11,.42);background:linear-gradient(155deg,#121d3b,#091126);border-radius:18px;padding:20px;margin-top:12px}
+.cs-book-cover{border-bottom:1px solid rgba(245,158,11,.25);padding-bottom:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cs-book-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.cs-book-card{background:rgba(7,12,27,.72);border:1px solid var(--border);border-radius:12px;padding:12px}
+.cs-book-card h4{margin:0 0 6px;font-size:13px;color:#fcd37c}
+.cs-book-card ul{margin:0;padding-inline-start:18px;font-size:12px;color:#e2ebff}
+.canvas-box{display:flex;justify-content:center;align-items:center;background:#070d1c;border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:10px}
+.canvas-box canvas{max-width:100%;max-height:430px;width:auto;height:auto;border-radius:10px}
+.stitch-list{display:grid;gap:8px;margin:10px 0}
+.stitch-frame{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--border);border-radius:10px;background:#081020}
+.stitch-frame img{width:54px;height:54px;object-fit:cover;border-radius:7px;flex-shrink:0;border:1px solid var(--border-strong)}
+.stitch-frame input{flex:1;min-width:0;background:#0e172a;color:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:12px}
+@media(max-width:650px){.cs-book-grid{grid-template-columns:1fr}.stitch-frame{flex-wrap:wrap}}
+@media print{
+  body.print-book{background:#fff!important;color:#111!important}
+  body.print-book .top,body.print-book .nav-row,body.print-book .kpi-grid,body.print-book .filter-bar,body.print-book .cols>section:first-child,body.print-book .detail-head,body.print-book .subtabs,body.print-book .cs-editor,body.print-book .cs-actions,body.print-book .stitch-section,body.print-book #adminToast{display:none!important}
+  body.print-book .cols{display:block!important}
+  body.print-book .panel{border:0!important;background:#fff!important;padding:0!important}
+  body.print-book .cs-book{background:#fff!important;color:#111!important;border:2px solid #2b3a67!important}
+  body.print-book .cs-book-card{background:#f7f9fc!important;border-color:#cbd5e1!important;color:#111!important}
+  body.print-book .cs-book-card h4{color:#1e293b!important}
+  body.print-book .cs-book-card ul{color:#1e293b!important}
+}
 </style>
-</head>
+<script src="/_aistudio-iframe.js?v=29045eb3"></script></head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="brand-mark" aria-hidden="true">خ</div>
+      <div class="brand-mark">خ</div>
       <div>خُطوة<small>غرفة عمليات الإدارة والنمو · Khutwa Command Center</small></div>
     </div>
     <div class="top-meta">
@@ -132,7 +160,7 @@ tr[data-id].selected{background:#1b2d52}
   </header>
 
   <section id="login" class="panel login">
-    <div class="login-logo" aria-hidden="true">خ</div>
+    <div class="login-logo">خ</div>
     <h1>دخول غرفة العمليات</h1>
     <p class="muted" style="font-size:13px;margin:0 0 14px">هذه مساحة الإدارة الخاصة بمنصة خُطوة. سجّل الدخول بكلمة مرور المدير.</p>
     <form id="loginForm">
@@ -233,6 +261,7 @@ tr[data-id].selected{background:#1b2d52}
               <button class="subtab" type="button" data-client-tab="whatsapp">رسائل واتساب</button>
               <button class="subtab" type="button" data-client-tab="roles">دور المنسق vs الذكاء</button>
               <button class="subtab" type="button" data-client-tab="ai">مساعد Gemini AI</button>
+              <button class="subtab" type="button" data-client-tab="casestudy">دراسة الحالة والصور</button>
             </div>
 
             <div id="client-manage">
@@ -313,7 +342,7 @@ tr[data-id].selected{background:#1b2d52}
 
             <div id="client-ai" class="hidden">
               <div class="two">
-                <div class="field"><label for="aiTask">المهمة المطلوبة من Gemini</label><select id="aiTask"><option value="audit">تحليل الحالة وتحديد النواقص</option><option value="proposal">صياغة عرض سعر ورسالة واتساب</option><option value="profile_draft">مسودة العنوان والنبذة (Headline &amp; Bio)</option><option value="video_script">كتابة سكربت الفيديو التعريفي</option><option value="market_brief">خطة مراجعة السوق والمنصات</option><option value="custom">طلب مخصص</option></select></div>
+                <div class="field"><label for="aiTask">المهمة المطلوبة من Gemini</label><select id="aiTask"><option value="audit">تحليل الحالة وتحديد النواقص</option><option value="case_study_json">توليد دراسة حالة منظمة (JSON Book)</option><option value="proposal">صياغة عرض سعر ورسالة واتساب</option><option value="profile_draft">مسودة العنوان والنبذة (Headline &amp; Bio)</option><option value="video_script">كتابة سكربت الفيديو التعريفي</option><option value="market_brief">خطة مراجعة السوق والمنصات</option><option value="custom">طلب مخصص</option></select></div>
                 <div class="field"><label for="aiLang">لغة المخرج</label><select id="aiLang"><option value="ar">العربية</option><option value="en">English</option></select></div>
               </div>
               <div class="field"><label for="aiInstruction">تعليمات إضافية (اختياري)</label><textarea id="aiInstruction" rows="2" placeholder="مثال: ركز على التدريس للأطفال أونلاين، أو خصم خاص 15%…"></textarea></div>
@@ -327,6 +356,43 @@ tr[data-id].selected{background:#1b2d52}
               <div id="aiHistoryBox" class="hidden" style="margin-top:14px">
                 <h4 style="margin:0 0 6px;font-size:13px;color:#b7c8ff">سجل تحليلات Gemini السابقة لهذا الطلب</h4>
                 <div id="aiHistoryList"></div>
+              </div>
+            </div>
+
+            <div id="client-casestudy" class="hidden">
+              <div class="actions cs-actions" style="margin-bottom:10px">
+                <button id="csAiFillBtn" type="button">تعبئة ذكية عبر Gemini AI ✦</button>
+                <button id="csSaveBtn" type="button" class="mint-btn">حفظ دراسة الحالة للعميل</button>
+                <button id="csPrintBtn" type="button" class="secondary">طباعة / تصدير PDF</button>
+              </div>
+              <div id="csMsg" class="msg"></div>
+              <div class="cs-editor">
+                <div class="field"><label for="csHeadline">الملخص التنفيذي للحالة (غلاف الكتاب)</label><input id="csHeadline" placeholder="ملخص دقيق لنقطة بداية العميل والهدف الأهم…"></div>
+                <div class="two">
+                  <div class="field"><label for="csStrengths">نقاط القوة الحالية (سطر لكل نقطة)</label><textarea id="csStrengths" rows="3" placeholder="خبرة عملية واضحة&#10;تخصص محدد…"></textarea></div>
+                  <div class="field"><label for="csObstacles">العوائق والفجوات (سطر لكل نقطة)</label><textarea id="csObstacles" rows="3" placeholder="العنوان عام ولا يجذب المتعلم&#10;غياب فيديو…"></textarea></div>
+                </div>
+                <div class="field"><label for="csPlatformFit">تقييم المنصة والتخصص</label><textarea id="csPlatformFit" rows="2" placeholder="تقييم واقعي لملاءمة المنصة الحالية والمستهدفة…"></textarea></div>
+                <div class="field"><label for="csSteps">خطوات الأولوية (بصيغة: العنوان | التفصيل — سطر لكل خطوة)</label><textarea id="csSteps" rows="3" placeholder="1. إعادة صياغة العنوان | توضيح التخصص والجمهور المستهدف&#10;2. تصوير فيديو 60 ثانية | تطبيق السكربت المرفق"></textarea></div>
+                <div class="field"><label for="csRecommendation">التوصية الصادقة النهائية</label><textarea id="csRecommendation" rows="2" placeholder="التوصية العملية الواقعية دون وعود مضللة…"></textarea></div>
+              </div>
+              <div id="csBookPreview"></div>
+
+              <div class="stitch-section" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                <div class="section-title"><h3>تجميع الصور المطولة لبروفايل العميل (Long Audit Stitcher)</h3></div>
+                <p class="muted" style="font-size:12px;margin:0 0 10px">ارفع لقطات متتالية من بروفايل العميل (الصورة، العنوان، النبذة، التقييمات)، رتّبها وأضف تعليق المراجعة تحت كل لقطة، ثم نزّل صورة مطولة واحدة بهوية خُطوة لإرسالها للعميل.</p>
+                <div class="two">
+                  <div class="field"><label for="stitchFiles">اختر لقطات البروفايل (صور متعددة)</label><input id="stitchFiles" type="file" accept="image/*" multiple></div>
+                  <div class="field"><label for="stitchTitle">عنوان التقرير أعلى الصورة المطولة</label><input id="stitchTitle" placeholder="مراجعة بروفايل خُطوة — التقرير البصري"></div>
+                </div>
+                <label class="toggle-row"><input id="stitchWatermark" type="checkbox" checked> إضافة غلاف خُطوة والعلامة المائية</label>
+                <div id="stitchList" class="stitch-list"></div>
+                <div class="actions">
+                  <button id="stitchRenderBtn" type="button">تجميع ومعاينة الصورة المطولة ✦</button>
+                  <button id="stitchDownloadBtn" type="button" class="mint-btn">تنزيل PNG المطولة ↓</button>
+                  <button id="stitchClearBtn" type="button" class="ghost-btn">مسح الصور</button>
+                </div>
+                <div class="canvas-box"><canvas id="stitchCanvas" class="hidden"></canvas><span id="stitchPlaceholder" class="muted" style="font-size:12px">ستظهر الصورة المطولة المجمعة هنا…</span></div>
               </div>
             </div>
           </div>
@@ -357,6 +423,58 @@ tr[data-id].selected{background:#1b2d52}
     </div>
 
     <div id="tab-marketing" class="hidden">
+      <div class="cols" style="margin-bottom:15px">
+        <section class="panel">
+          <div class="section-title"><h2>استوديو صناعة المحتوى الذكي (Marketing Studio)</h2></div>
+          <div class="two">
+            <div class="field"><label for="msTarget">الخدمة / الموضوع</label><select id="msTarget"><option value="">الصفحة الرئيسية (رؤية خُطوة)</option><option value="service:profile_creation">خدمة: إنشاء بروفايل</option><option value="service:profile_development">خدمة: تطوير بروفايل</option><option value="service:video_creation">خدمة: إنشاء فيديو</option><option value="service:video_development">خدمة: تطوير فيديو</option><option value="service:video_bundle">خدمة: باقة الفيديو</option><option value="service:individual_consultation">خدمة: جلسة توجيه فردية</option><option value="service:campaign_review">خدمة: دراسة حملة ترويجية</option><option value="service:market_review">خدمة: دراسة حالة مجانية</option><option value="topic:topic_trial_opening">موضوع: الحصة التجريبية</option><option value="topic:topic_positioning_niche">موضوع: تحديد التخصص</option><option value="topic:topic_search_terms">موضوع: الظهور في البحث</option></select></div>
+            <div class="field"><label for="msPlatform">المنصة المستهدفة</label><select id="msPlatform"><option value="linkedin">LinkedIn</option><option value="facebook">Facebook</option><option value="pinterest">Pinterest Pin</option><option value="tiktok_shorts">TikTok / YouTube Shorts</option><option value="google_post">Google Post</option></select></div>
+          </div>
+          <div class="three">
+            <div class="field"><label for="msAngle">زاوية المحتوى</label><select id="msAngle"><option value="pain_to_solution">مشكلة وحل عملي</option><option value="educational_tip">نصيحة مجانية (30% قيمة)</option><option value="free_case_study">دعوة لدراسة الحالة المجانية</option><option value="behind_khutwa">كيف تعمل خُطوة</option></select></div>
+            <div class="field"><label for="msLang">اللغة</label><select id="msLang"><option value="ar">العربية</option><option value="en">English</option></select></div>
+            <div class="field"><label for="msRef">كود إحالة (اختياري)</label><input id="msRef" placeholder="KHALED10"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="msSource">utm_source</label><input id="msSource" placeholder="pinterest / linkedin"></div>
+            <div class="field"><label for="msCampaign">utm_campaign</label><input id="msCampaign" placeholder="launch_content"></div>
+          </div>
+          <div class="actions" style="margin-bottom:10px">
+            <button id="msGenerateBtn" type="button">توليد المحتوى والرابط ✦</button>
+            <button id="msSavePostBtn" type="button" class="mint-btn">حفظ في بنك المنشورات</button>
+            <button id="msCopyBodyBtn" type="button" class="secondary">نسخ المنشور</button>
+            <button id="msCopyPromptBtn" type="button" class="ghost-btn hidden">نسخ برومبت Gemini</button>
+          </div>
+          <div id="msMsg" class="msg"></div>
+          <div class="field"><label for="msTitle">عنوان المنشور / الفكرة</label><input id="msTitle" placeholder="عنوان جذاب…"></div>
+          <div class="field"><label for="msUrl">رابط الهبوط المدمج (UTM + Deep Link)</label><input id="msUrl" class="ltr-val" readonly placeholder="سيُولد تلقائيًا…"></div>
+          <div class="field"><label for="msBody">نص المنشور (قابل للتعديل)</label><textarea id="msBody" rows="6"></textarea></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-title"><h2>مولّد بوسترات بينتريست والسوشيال (Poster Canvas)</h2></div>
+          <div class="two">
+            <div class="field"><label for="psRatio">مقاس البوستر</label><select id="psRatio"><option value="pinterest">Pinterest (1000×1500 · 2:3)</option><option value="square">Square Social (1080×1080 · 1:1)</option></select></div>
+            <div class="field"><label for="psTheme">الألوان والهوية</label><select id="psTheme"><option value="navy_gold">كحلي ملكي وذهبي (خُطوة)</option><option value="purple_glow">بنفسجي عصري وتوهج سماوي</option><option value="emerald_clean">أخضر زمردي وداكن</option></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="psHeadline">العنوان على الصورة (4–6 كلمات)</label><input id="psHeadline" value="طوّر بروفايلك التدريسي بثقة"></div>
+            <div class="field"><label for="psCta">زر/شارة الدعوة</label><input id="psCta" value="ابدأ بدراسة حالة مجانية ↗"></div>
+          </div>
+          <div class="field"><label for="psBullets">3 نقاط مختصرة على البوستر (سطر لكل نقطة)</label><textarea id="psBullets" rows="3">عنوان واضح يجذب المتعلمين&#10;نبذة مرتبة بدون حشو&#10;فيديو تعريفي في 60 ثانية</textarea></div>
+          <div class="actions">
+            <button id="psRenderBtn" type="button">تحديث البوستر</button>
+            <button id="psDownloadBtn" type="button" class="mint-btn">تنزيل البوستر PNG ↓</button>
+          </div>
+          <div class="canvas-box"><canvas id="posterCanvas" width="1000" height="1500"></canvas></div>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-bottom:15px">
+        <div class="section-title"><h2>بنك المنشورات المحفوظة وجاهزية النشر</h2></div>
+        <div class="table-wrap"><table><thead><tr><th>العنوان والمنصة</th><th>الرابط المدمج</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="mktPostRows"><tr><td colspan="4" class="muted">لا توجد منشورات محفوظة بعد</td></tr></tbody></table></div>
+      </section>
+
       <div class="cols">
         <section class="panel">
           <div class="section-title"><h2>مولّد روابط التسويق المباشرة (Deep Links + UTM)</h2></div>
@@ -409,11 +527,11 @@ tr[data-id].selected{background:#1b2d52}
             <div class="field"><label for="cTitleEn">Title in English</label><input id="cTitleEn"></div>
           </div>
           <div class="two">
-            <div class="field"><label for="cType">النوع</label><select id="cType"><option value="video">فيديو خاص</option><option value="guide">دليل مكتوب</option><option value="checklist">قائمة تحقق</option><option value="pdf">مستند / PDF</option></select></div>
+            <div class="field"><label for="cType">النوع</label><select id="cType"><option value="video">فيديو خاص</option><option value="guide">دليل مكتوب</option><option value="checklist">قائمة تحقق</option><option value="pdf">مستند / PDF</option><option value="teleprompter">مساعد تلقين الفيديو (Audio Teleprompter)</option></select></div>
             <div class="field"><label for="cDuration">المدة أو الحجم</label><input id="cDuration" placeholder="12 دقيقة / 5 صفحات"></div>
           </div>
           <div class="field"><label for="cUrl">رابط المصدر (Drive / YouTube غير مدرج / MP4 مباشر) — مخفي عن صفحة العميل</label><input id="cUrl" placeholder="https://..."></div>
-          <div class="field"><label for="cBody">محتوى نصي / ملخص يظهر داخل البوابة</label><textarea id="cBody" rows="4"></textarea></div>
+          <div class="field"><label for="cBody">محتوى نصي / ملخص يظهر داخل البوابة</label><textarea id="cBody" rows="4"></textarea><small class="muted">لتلقين الفيديو (Teleprompter): اكتب كل جملة في سطر مع المدة مثل <code>[6s] أهلاً بكم في درسي الأول...</code></small></div>
           <button id="saveContentBtn" type="button">حفظ المادة في الخزنة</button>
           <div id="contentMsg" class="msg"></div>
         </section>
@@ -434,11 +552,13 @@ tr[data-id].selected{background:#1b2d52}
 <script>
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
-let selected=null; let allRequests=[]; let currentSettings=null; let vaultItems=[]; let issuedTokens=[]; let lastAiResult=null;
-let activeBatchFilter=''; let dueOnlyFilter=false; let lastIssuedUrl='';
+let selected=null; let allRequests=[]; let currentSettings=null; let vaultItems=[]; let issuedTokens=[]; let allMarketingPosts=[]; let lastAiResult=null; let lastStudioPrompt='';
+let activeBatchFilter=''; let dueOnlyFilter=false; let lastIssuedUrl=''; let stitchFrames=[];
 const STATUS={new:'جديد',reviewing:'قيد المراجعة',needs_info:'يحتاج بيانات',offer_sent:'تم إرسال العرض',awaiting_deposit:'بانتظار العربون',confirmed:'مؤكد',in_progress:'قيد التنفيذ',awaiting_client_review:'بانتظار مراجعة العميل',awaiting_balance:'بانتظار المتبقي',completed:'مكتمل',paused:'متوقف',cancelled:'ملغي',overdue:'متأخر'};
 const SVC_NAMES={profile_creation:'إنشاء بروفايل',profile_development:'تطوير بروفايل',video_creation:'إنشاء فيديو',video_development:'تطوير فيديو',video_bundle:'باقة الفيديو',consultation_30:'جلسة 30 د',consultation_60:'جلسة 60 د',market_review:'دراسة حالة'};
-const TYPE_LABELS={video:'فيديو خاص',guide:'دليل مكتوب',checklist:'قائمة تحقق',pdf:'مستند PDF'};
+const TYPE_LABELS={video:'فيديو خاص',guide:'دليل مكتوب',checklist:'قائمة تحقق',pdf:'مستند PDF',teleprompter:'تلقين فيديو Teleprompter'};
+
+const posterLogoImg=new Image(); posterLogoImg.src='/assets/khutwa-mark.jpg';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function dateFmt(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?esc(v):d.toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'});}
@@ -460,11 +580,12 @@ $$('[data-main-tab]').forEach(btn=>btn.addEventListener('click',()=>{
   const tab=btn.dataset.mainTab;
   $$('[data-main-tab]').forEach(b=>b.classList.toggle('active',b===btn));
   ['operations','settings','marketing','vault'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==tab));
+  if(tab==='marketing') renderPosterCanvas();
 }));
 $$('[data-client-tab]').forEach(btn=>btn.addEventListener('click',()=>{
   const tab=btn.dataset.clientTab;
   $$('[data-client-tab]').forEach(b=>b.classList.toggle('active',b===btn));
-  ['manage','whatsapp','roles','ai'].forEach(t=>$('#client-'+t).classList.toggle('hidden',t!==tab));
+  ['manage','whatsapp','roles','ai','casestudy'].forEach(t=>$('#client-'+t).classList.toggle('hidden',t!==tab));
 }));
 
 async function checkSession(){
@@ -494,12 +615,13 @@ $('#vaultSearch').addEventListener('input',()=>renderContentVault(vaultItems));
 
 async function refreshAll(){
   try{
-    const [ov, setRes, refRes, cntRes, tokRes]=await Promise.all([
+    const [ov, setRes, refRes, cntRes, tokRes, mktRes]=await Promise.all([
       api('/api/admin/overview'),
       api('/api/admin/settings'),
       api('/api/admin/referrals'),
       api('/api/admin/content'),
-      api('/api/admin/access-tokens')
+      api('/api/admin/access-tokens'),
+      api('/api/admin/marketing-posts')
     ]);
     const o=ov.overview;
     $('#mTotal').textContent=o.totalRequests;
@@ -531,6 +653,8 @@ async function refreshAll(){
     renderContentVault(vaultItems);
     issuedTokens=tokRes.tokens||[];
     renderTokens(issuedTokens);
+    allMarketingPosts=mktRes.posts||[];
+    renderMarketingPosts(allMarketingPosts);
     await loadRequests();
   }catch(err){if(err.message.includes('Authentication'))checkSession();else console.error(err);}
 }
@@ -643,6 +767,7 @@ function selectRequest(id){
 
   renderRolesMatrix(r);
   renderAiSection(r);
+  fillCaseStudyForm(r.caseStudy);
 }
 
 function renderRolesMatrix(r){
@@ -712,6 +837,9 @@ $('#toggleIssuerBtn').addEventListener('click',()=>{
     }).join('');
   }
   $('#tokNote').value=selected.deliveryLinks?.finalUrl?`رابط التسليم المرفق: ${selected.deliveryLinks.finalUrl}`:'';
+  const syncTokBtn=()=>{const cbs=$$('#tokContentList input[type="checkbox"]');$('#tokSelectAllBtn').textContent=cbs.length&&cbs.every(c=>c.checked)?'إلغاء تحديد الكل':'تحديد الكل';};
+  syncTokBtn();
+  $$('#tokContentList input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',syncTokBtn));
   $('#tokenIssuerBox').classList.remove('hidden');
 });
 $('#closeIssuerBtn').addEventListener('click',()=>$('#tokenIssuerBox').classList.add('hidden'));
@@ -719,6 +847,7 @@ $('#tokSelectAllBtn').addEventListener('click',()=>{
   const cbs=$$('#tokContentList input[type="checkbox"]');
   const allChecked=cbs.every(c=>c.checked);
   cbs.forEach(c=>{c.checked=!allChecked;});
+  $('#tokSelectAllBtn').textContent=!allChecked?'إلغاء تحديد الكل':'تحديد الكل';
 });
 $('#issueTokenConfirmBtn').addEventListener('click',async()=>{
   if(!selected)return;
@@ -737,7 +866,7 @@ $('#issueTokenConfirmBtn').addEventListener('click',async()=>{
     $('#copyIssuedUrlBtn').addEventListener('click',()=>copyText(res.accessUrl,'تم نسخ رابط البوابة ✓'));
     $('#openPortalWaBtn').addEventListener('click',()=>{
       $$('[data-client-tab]').forEach(b=>b.classList.toggle('active',b.dataset.clientTab==='whatsapp'));
-      ['manage','whatsapp','roles','ai'].forEach(t=>$('#client-'+t).classList.toggle('hidden',t!=='whatsapp'));
+      ['manage','whatsapp','roles','ai','casestudy'].forEach(t=>$('#client-'+t).classList.toggle('hidden',t!=='whatsapp'));
       $$('[data-wa-tpl]').forEach(b=>b.classList.toggle('active',b.dataset.waTpl==='portal'));
       $('#waDraft').value=buildWaTemplate('portal',selected);syncWaHref();
     });
@@ -761,6 +890,7 @@ $('#runAiBtn').addEventListener('click',async()=>{
       $('#aiMsg').textContent=`تم التوليد مباشرة عبر ${res.model}`;
       $('#aiOutputBox').textContent=res.output;
       $('#saveAiToNotesBtn').classList.remove('hidden');
+      if(res.caseStudy){selected.caseStudy=res.caseStudy;fillCaseStudyForm(res.caseStudy);}
       if(res.aiNotes){selected.aiNotes=res.aiNotes;renderAiSection(selected);}
     }else{
       $('#aiMsg').textContent=res.message||('تم تجهيز البرومبت للنسخ الفوري في Gemini ('+(res.error||'')+')');
@@ -772,6 +902,170 @@ $('#runAiBtn').addEventListener('click',async()=>{
 });
 $('#copyPromptBtn').addEventListener('click',async()=>{if(!lastAiResult?.prompt)return;await copyText(lastAiResult.prompt,'تم نسخ البرومبت — الصقه في Gemini ✓');});
 $('#saveAiToNotesBtn').addEventListener('click',()=>{if(!lastAiResult?.output)return;$('#dNotes').value=($('#dNotes').value?$('#dNotes').value+'\n\n':'')+lastAiResult.output;$('#aiMsg').textContent='أُضيف إلى الملاحظات — اضغط حفظ التعديلات في تبويب الإدارة.';showToast('تمت الإضافة للملاحظات');});
+
+/* ---------- Case Study Book Builder & Print PDF ---------- */
+function readCaseStudyForm(){
+  const lines=id=>$(id).value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const steps=lines('#csSteps').map(row=>{
+    const parts=row.split('|');
+    return {title:(parts[0]||'خطوة').trim(),detail:(parts.slice(1).join('|')||parts[0]||'').trim()};
+  });
+  return {
+    headlineSummary:$('#csHeadline').value.trim(),
+    strengths:lines('#csStrengths'),
+    obstacles:lines('#csObstacles'),
+    platformAssessment:$('#csPlatformFit').value.trim(),
+    prioritySteps:steps,
+    honestRecommendation:$('#csRecommendation').value.trim(),
+    updatedAt:new Date().toISOString()
+  };
+}
+function fillCaseStudyForm(cs){
+  $('#csHeadline').value=cs?.headlineSummary||'';
+  $('#csStrengths').value=(cs?.strengths||[]).join('\n');
+  $('#csObstacles').value=(cs?.obstacles||[]).join('\n');
+  $('#csPlatformFit').value=cs?.platformAssessment||'';
+  $('#csSteps').value=(cs?.prioritySteps||[]).map(s=>`${s.title} | ${s.detail}`).join('\n');
+  $('#csRecommendation').value=cs?.honestRecommendation||'';
+  $('#csMsg').textContent='';
+  renderCsBookPreview();
+}
+function renderCsBookPreview(){
+  const host=$('#csBookPreview'); if(!host || !selected)return;
+  const cs=readCaseStudyForm();
+  const hasAny=cs.headlineSummary||cs.strengths.length||cs.obstacles.length||cs.platformAssessment||cs.prioritySteps.length||cs.honestRecommendation;
+  if(!hasAny){host.innerHTML='<div class="notice">ابدأ بكتابة نقاط دراسة الحالة أو اضغط «تعبئة ذكية عبر Gemini AI» لعرض معاينة كتاب خُطوة المطبوع هنا.</div>';return;}
+  host.innerHTML=`<div class="cs-book">
+    <div class="cs-book-cover"><div><b style="font-size:17px;color:#fcd37c">📖 كتاب دراسة حالة خُطوة</b><br><small class="muted">${esc(selected.customer_name)} · ${esc(selected.subject)} · ${esc(selected.id)}</small></div><span class="tag-txt ok">تقرير مهني معتمد</span></div>
+    ${cs.headlineSummary?`<p style="margin:0 0 12px;font-size:14px">${esc(cs.headlineSummary)}</p>`:''}
+    <div class="cs-book-grid">
+      <div class="cs-book-card"><h4>✓ نقاط القوة الحالية</h4><ul>${(cs.strengths.length?cs.strengths:['—']).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="cs-book-card"><h4>⚠ الفجوات والعوائق</h4><ul>${(cs.obstacles.length?cs.obstacles:['—']).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    </div>
+    ${cs.platformAssessment?`<div class="cs-book-card" style="margin-bottom:10px"><h4>◎ تقييم المنصة والتخصص</h4><p style="margin:0;font-size:12px">${esc(cs.platformAssessment)}</p></div>`:''}
+    ${cs.prioritySteps.length?`<div class="cs-book-card" style="margin-bottom:10px"><h4>↗ خطوات الأولوية</h4><ul>${cs.prioritySteps.map(s=>`<li><b>${esc(s.title)}:</b> ${esc(s.detail)}</li>`).join('')}</ul></div>`:''}
+    ${cs.honestRecommendation?`<div class="cs-book-card"><h4>✦ توصية خُطوة الصادقة</h4><p style="margin:0;font-size:12px">${esc(cs.honestRecommendation)}</p></div>`:''}
+  </div>`;
+}
+['#csHeadline','#csStrengths','#csObstacles','#csPlatformFit','#csSteps','#csRecommendation'].forEach(sel=>$(sel).addEventListener('input',renderCsBookPreview));
+$('#csAiFillBtn').addEventListener('click',async()=>{
+  if(!selected)return;
+  $('#csAiFillBtn').disabled=true;$('#csMsg').textContent='جارٍ توليد دراسة الحالة عبر Gemini…';
+  try{
+    const res=await api('/api/admin/ai-assist',{method:'POST',body:JSON.stringify({requestId:selected.id,task:'case_study_json',lang:$('#aiLang').value||'ar'})});
+    if(res.mode==='gemini_api' && res.caseStudy){
+      selected.caseStudy=res.caseStudy;
+      fillCaseStudyForm(res.caseStudy);
+      $('#csMsg').textContent=`تم توليد وحفظ دراسة الحالة عبر ${res.model} ✓`;
+      showToast('تمت تعبئة دراسة الحالة بنجاح ✓');
+      await refreshAll();
+    }else if(res.prompt){
+      await copyText(res.prompt,'تم نسخ برومبت دراسة الحالة JSON لـ Gemini ✓');
+      $('#csMsg').textContent='مفتاح API غير مضاف — نُسخ البرومبت المخصص لصيغة الكتاب لإرساله في Gemini ولصق النتيجة.';
+    }
+  }catch(err){$('#csMsg').textContent=err.message;}
+  finally{$('#csAiFillBtn').disabled=false;}
+});
+$('#csSaveBtn').addEventListener('click',async()=>{
+  if(!selected)return;
+  $('#csSaveBtn').disabled=true;$('#csMsg').textContent='جارٍ الحفظ لبوابة العميل…';
+  try{
+    const cs=readCaseStudyForm();
+    await api('/api/admin/requests/'+encodeURIComponent(selected.id),{method:'PATCH',body:JSON.stringify({caseStudy:cs})});
+    selected.caseStudy=cs;
+    $('#csMsg').textContent='تم حفظ دراسة الحالة وتحديث بوابة /access للعميل ✓';
+    showToast('تم حفظ كتاب دراسة الحالة ✓');
+    await refreshAll();
+  }catch(err){$('#csMsg').textContent=err.message;}
+  finally{$('#csSaveBtn').disabled=false;}
+});
+$('#csPrintBtn').addEventListener('click',()=>{
+  if(!selected)return;
+  renderCsBookPreview();
+  document.body.classList.add('print-book');
+  const cleanup=()=>document.body.classList.remove('print-book');
+  window.addEventListener('afterprint',cleanup,{once:true});
+  window.print();
+  setTimeout(cleanup,1200);
+});
+
+/* ---------- Canvas Long Profile Screenshot Stitcher ---------- */
+function renderStitchList(){
+  const host=$('#stitchList');
+  host.innerHTML=stitchFrames.map((f,i)=>`<div class="stitch-frame">
+    <img src="${f.src}" alt="لقطة ${i+1}">
+    <input type="text" data-st-cap="${i}" value="${esc(f.caption)}" placeholder="ملاحظة المراجعة للقطة ${i+1} (مثلاً: العنوان يحتاج تحديد التخصص)…">
+    <button type="button" class="ghost-btn" data-st-up="${i}" ${i===0?'disabled':''}>↑</button>
+    <button type="button" class="ghost-btn" data-st-dn="${i}" ${i===stitchFrames.length-1?'disabled':''}>↓</button>
+    <button type="button" class="danger" data-st-del="${i}">حذف</button>
+  </div>`).join('');
+  host.querySelectorAll('[data-st-cap]').forEach(inp=>inp.addEventListener('input',()=>{stitchFrames[Number(inp.dataset.stCap)].caption=inp.value;}));
+  host.querySelectorAll('[data-st-up]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stUp);if(i>0){[stitchFrames[i-1],stitchFrames[i]]=[stitchFrames[i],stitchFrames[i-1]];renderStitchList();}}));
+  host.querySelectorAll('[data-st-dn]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stDn);if(i<stitchFrames.length-1){[stitchFrames[i+1],stitchFrames[i]]=[stitchFrames[i],stitchFrames[i+1]];renderStitchList();}}));
+  host.querySelectorAll('[data-st-del]').forEach(b=>b.addEventListener('click',()=>{stitchFrames.splice(Number(b.dataset.stDel),1);renderStitchList();renderStitchedCanvas();}));
+}
+$('#stitchFiles').addEventListener('change',async e=>{
+  const files=[...(e.target.files||[])].slice(0,12);
+  for(const file of files){
+    const src=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});
+    const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src;});
+    stitchFrames.push({src,img,caption:`الجزء ${stitchFrames.length+1}`});
+  }
+  e.target.value='';
+  renderStitchList();
+  renderStitchedCanvas();
+});
+function renderStitchedCanvas(){
+  const cv=$('#stitchCanvas');const ph=$('#stitchPlaceholder');
+  if(!stitchFrames.length){cv.classList.add('hidden');ph.classList.remove('hidden');return;}
+  const W=1080;const pad=36;const innerW=W-pad*2;const wm=$('#stitchWatermark').checked;
+  const headerH=wm?110:40;const footerH=wm?70:24;
+  const blocks=stitchFrames.map(f=>{
+    const scale=innerW/Math.max(1,f.img.naturalWidth||f.img.width);
+    const h=Math.round((f.img.naturalHeight||f.img.height)*scale);
+    return {f,h,capH:f.caption?56:14};
+  });
+  const totalH=headerH+blocks.reduce((s,b)=>s+b.capH+b.h+24,0)+footerH;
+  cv.width=W;cv.height=Math.min(12000,totalH);
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#080c20';ctx.fillRect(0,0,W,cv.height);
+  if(wm){
+    const grad=ctx.createLinearGradient(0,0,W,0);grad.addColorStop(0,'#222c6a');grad.addColorStop(1,'#4c2f85');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,headerH);
+    ctx.fillStyle='#ffffff';ctx.font='bold 30px Tahoma, Arial';ctx.textAlign='right';
+    ctx.fillText($('#stitchTitle').value.trim()||`تقرير مراجعة البروفايل — ${selected?.customer_name||'خُطوة'}`,W-36,52);
+    ctx.fillStyle='#cbd5ff';ctx.font='18px Tahoma, Arial';
+    ctx.fillText('KHUTWA · Better Profiles. Bigger Opportunities.',W-36,84);
+  }
+  let y=headerH+20;
+  blocks.forEach((b,idx)=>{
+    if(b.f.caption){
+      ctx.fillStyle='#132044';ctx.fillRect(pad,y,innerW,44);
+      ctx.fillStyle='#9ff1df';ctx.font='bold 20px Tahoma, Arial';ctx.textAlign='right';
+      ctx.fillText(`#${idx+1} · ${b.f.caption}`,W-pad-16,y+29);
+      y+=52;
+    }
+    ctx.drawImage(b.f.img,pad,y,innerW,b.h);
+    ctx.strokeStyle='rgba(160,175,255,.3)';ctx.lineWidth=2;ctx.strokeRect(pad,y,innerW,b.h);
+    y+=b.h+24;
+  });
+  if(wm){
+    ctx.fillStyle='#96a8c8';ctx.font='18px Tahoma, Arial';ctx.textAlign='center';
+    ctx.fillText('Khutwa Tutor Growth & Support · khotwa.khotwatutors.workers.dev',W/2,cv.height-26);
+  }
+  cv.classList.remove('hidden');ph.classList.add('hidden');
+}
+$('#stitchRenderBtn').addEventListener('click',()=>{if(!stitchFrames.length){showToast('أضف لقطة شاشة واحدة على الأقل.');return;}renderStitchedCanvas();showToast('تم تجميع الصورة المطولة ✓');});
+$('#stitchClearBtn').addEventListener('click',()=>{stitchFrames=[];renderStitchList();renderStitchedCanvas();});
+$('#stitchDownloadBtn').addEventListener('click',()=>{
+  if(!stitchFrames.length){showToast('ارفع الصور وولّد المعاينة أولًا.');return;}
+  renderStitchedCanvas();
+  const a=document.createElement('a');
+  a.download=`khutwa-profile-audit-${selected?.id||'long'}.png`;
+  a.href=$('#stitchCanvas').toDataURL('image/png');
+  a.click();
+  showToast('تم تنزيل الصورة المطولة ✓');
+});
 
 function renderSettingsForm(s){
   if(!s)return;
@@ -803,6 +1097,120 @@ $('#saveSettingsBtn').addEventListener('click',async()=>{
     await refreshAll();
   }catch(err){$('#settingsMsg').textContent=err.message;}
 });
+
+/* ---------- Marketing Studio, Pinterest Poster Canvas & Posts Bank ---------- */
+function wrapCanvasText(ctx, text, maxWidth){
+  const words=String(text||'').trim().split(/\s+/).filter(Boolean);
+  const lines=[];let cur='';
+  words.forEach(w=>{const test=cur?cur+' '+w:w;if(ctx.measureText(test).width>maxWidth&&cur){lines.push(cur);cur=w;}else cur=test;});
+  if(cur)lines.push(cur);
+  return lines;
+}
+function renderPosterCanvas(){
+  const cv=$('#posterCanvas');if(!cv)return;
+  const isSq=$('#psRatio').value==='square';
+  const W=isSq?1080:1000;const H=isSq?1080:1500;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  const th=$('#psTheme').value;
+  const pals={
+    navy_gold:['#090e26','#182756','#f4d18d'],
+    purple_glow:['#110c2e','#372270','#9ff1df'],
+    emerald_clean:['#071b1c','#0f423d','#f4d18d']
+  }[th]||['#090e26','#182756','#f4d18d'];
+  const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,pals[0]);bg.addColorStop(1,pals[1]);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=4;ctx.strokeRect(36,36,W-72,H-72);
+  if(posterLogoImg.complete&&posterLogoImg.naturalWidth>0){
+    ctx.drawImage(posterLogoImg,W-170,74,90,90);
+  }
+  ctx.fillStyle='#ffffff';ctx.font='bold 42px Tahoma, Arial';ctx.textAlign='right';
+  ctx.fillText('خُطوة | Khutwa',W-(posterLogoImg.naturalWidth>0?185:84),124);
+  ctx.fillStyle=pals[2];ctx.font='bold 20px Tahoma, Arial';
+  ctx.fillText('TUTOR GROWTH & SUPPORT',W-(posterLogoImg.naturalWidth>0?185:84),158);
+  const hl=$('#psHeadline').value.trim()||'طوّر حضورك التدريسي';
+  ctx.fillStyle='#ffffff';ctx.font=`bold ${isSq?62:72}px Tahoma, Arial`;ctx.textAlign='center';
+  const hlLines=wrapCanvasText(ctx,hl,W-160);
+  let y=isSq?290:360;
+  hlLines.slice(0,3).forEach(line=>{ctx.fillText(line,W/2,y);y+=isSq?84:96;});
+  const bullets=$('#psBullets').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,3);
+  y+=36;
+  bullets.forEach(b=>{
+    ctx.fillStyle='rgba(255,255,255,.08)';
+    ctx.fillRect(88,y,W-176,isSq?105:130);
+    ctx.strokeStyle='rgba(159,241,223,.32)';ctx.lineWidth=2;ctx.strokeRect(88,y,W-176,isSq?105:130);
+    ctx.fillStyle='#eef3ff';ctx.font=`bold ${isSq?28:32}px Tahoma, Arial`;ctx.textAlign='right';
+    ctx.fillText('✓  '+b,W-120,y+(isSq?62:76));
+    y+=isSq?130:160;
+  });
+  const cta=$('#psCta').value.trim()||'ابدأ بدراسة حالة مجانية ↗';
+  ctx.fillStyle=pals[2];ctx.fillRect(140,H-230,W-280,96);
+  ctx.fillStyle='#091026';ctx.font='bold 34px Tahoma, Arial';ctx.textAlign='center';
+  ctx.fillText(cta,W/2,H-170);
+  ctx.fillStyle='#b8c7e4';ctx.font='22px Tahoma, Arial';
+  ctx.fillText('khotwa.khotwatutors.workers.dev',W/2,H-78);
+}
+['#psRatio','#psTheme','#psHeadline','#psBullets','#psCta'].forEach(sel=>$(sel).addEventListener('input',renderPosterCanvas));
+$('#psRenderBtn').addEventListener('click',()=>{renderPosterCanvas();showToast('تم تحديث تصميم البوستر ✓');});
+$('#psDownloadBtn').addEventListener('click',()=>{
+  renderPosterCanvas();
+  const a=document.createElement('a');a.download=`khutwa-poster-${$('#psRatio').value}.png`;a.href=$('#posterCanvas').toDataURL('image/png');a.click();
+  showToast('تم تنزيل البوستر PNG ✓');
+});
+
+$('#msGenerateBtn').addEventListener('click',async()=>{
+  $('#msGenerateBtn').disabled=true;$('#msMsg').textContent='جارٍ صياغة المنشور وتوليد رابط التتبع…';
+  try{
+    const res=await api('/api/admin/marketing-studio',{method:'POST',body:JSON.stringify({
+      targetKey:$('#msTarget').value,platform:$('#msPlatform').value,angle:$('#msAngle').value,
+      lang:$('#msLang').value,referralCode:$('#msRef').value,utmSource:$('#msSource').value,utmCampaign:$('#msCampaign').value
+    })});
+    $('#msTitle').value=res.title||'';$('#msUrl').value=res.ctaUrl||'';$('#msBody').value=res.body||'';
+    if(res.overlayHeadline){$('#psHeadline').value=res.overlayHeadline;renderPosterCanvas();}
+    lastStudioPrompt=res.prompt||'';
+    $('#msCopyPromptBtn').classList.toggle('hidden',!lastStudioPrompt);
+    $('#msMsg').textContent=res.mode==='gemini_api'?`تم التوليد مباشرة عبر ${res.model} ✓`:'تم تجهيز مسودة احترافية + يمكنك نسخ برومبت Gemini المتخصص.';
+  }catch(err){$('#msMsg').textContent=err.message;}
+  finally{$('#msGenerateBtn').disabled=false;}
+});
+$('#msCopyBodyBtn').addEventListener('click',()=>copyText($('#msBody').value,'تم نسخ نص المنشور ✓'));
+$('#msCopyPromptBtn').addEventListener('click',()=>copyText(lastStudioPrompt,'تم نسخ برومبت Gemini ✓'));
+$('#msSavePostBtn').addEventListener('click',async()=>{
+  try{
+    await api('/api/admin/marketing-posts',{method:'POST',body:JSON.stringify({
+      targetKey:$('#msTarget').value,platform:$('#msPlatform').value,angle:$('#msAngle').value,
+      title:$('#msTitle').value.trim(),body:$('#msBody').value.trim(),ctaUrl:$('#msUrl').value.trim(),status:'ready'
+    })});
+    $('#msMsg').textContent='تم حفظ المنشور في بنك المنشورات ✓';showToast('حُفظ المنشور في البنك ✓');await refreshAll();
+  }catch(err){$('#msMsg').textContent=err.message;}
+});
+function renderMarketingPosts(posts){
+  const stMap={draft:'مسودة',ready:'جاهز للنشر',published:'منشور ✓'};
+  $('#mktPostRows').innerHTML=posts.length?posts.map(p=>`<tr>
+    <td style="white-space:normal;max-width:260px"><b>${esc(p.title)}</b><br><small class="muted">${esc(p.platform)} · ${esc(p.angle||'')}</small></td>
+    <td class="ltr-val" style="max-width:220px;white-space:normal">${esc(p.cta_url||'—')}</td>
+    <td><span class="tag-txt ${p.status==='published'?'ok':p.status==='ready'?'warn':''}">${esc(stMap[p.status]||p.status)}</span></td>
+    <td class="actions">
+      <button type="button" class="secondary" data-mp-load="${esc(p.id)}">فتح</button>
+      <button type="button" class="ghost-btn" data-mp-next="${esc(p.id)}" data-mp-st="${p.status==='ready'?'published':'ready'}">${p.status==='published'?'إرجاع جاهز':'تم النشر ✓'}</button>
+      <button type="button" class="danger" data-mp-del="${esc(p.id)}">حذف</button>
+    </td>
+  </tr>`).join(''):'<tr><td colspan="4" class="muted">لا توجد منشورات محفوظة بعد</td></tr>';
+  $('#mktPostRows').querySelectorAll('[data-mp-load]').forEach(b=>b.addEventListener('click',()=>{
+    const p=allMarketingPosts.find(x=>x.id===b.dataset.mpLoad);if(!p)return;
+    $('#msTitle').value=p.title;$('#msBody').value=p.body;$('#msUrl').value=p.cta_url||'';
+    if(p.platform)$('#msPlatform').value=p.platform;if(p.target_key)$('#msTarget').value=p.target_key;
+    showToast('تم تحميل المنشور في الاستوديو');
+  }));
+  $('#mktPostRows').querySelectorAll('[data-mp-next]').forEach(b=>b.addEventListener('click',async()=>{
+    await api('/api/admin/marketing-posts/'+encodeURIComponent(b.dataset.mpNext),{method:'PATCH',body:JSON.stringify({status:b.dataset.mpSt})});
+    showToast('تم تحديث حالة المنشور ✓');await refreshAll();
+  }));
+  $('#mktPostRows').querySelectorAll('[data-mp-del]').forEach(b=>b.addEventListener('click',async()=>{
+    await api('/api/admin/marketing-posts/'+encodeURIComponent(b.dataset.mpDel),{method:'DELETE'});
+    showToast('تم حذف المنشور');await refreshAll();
+  }));
+}
 
 $('#genLinkBtn').addEventListener('click',async()=>{
   const u=new URL(location.origin+'/');
