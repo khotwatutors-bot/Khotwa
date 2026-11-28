@@ -488,6 +488,20 @@ export async function ensurePhase2Schema(db) {
       await db.prepare(`ALTER TABLE requests ADD COLUMN ${col} ${type}`).run();
     }
   }
+  const mktInfo = await db.prepare('PRAGMA table_info(marketing_posts)').all();
+  const mktCols = new Set((mktInfo.results || []).map(c => c.name));
+  const mktAdditions = [
+    ['category', 'TEXT'],
+    ['keywords', 'TEXT'],
+    ['summary', 'TEXT'],
+    ['cover_url', 'TEXT'],
+    ['lang', "TEXT NOT NULL DEFAULT 'ar'"],
+  ];
+  for (const [col, type] of mktAdditions) {
+    if (!mktCols.has(col)) {
+      await db.prepare(`ALTER TABLE marketing_posts ADD COLUMN ${col} ${type}`).run();
+    }
+  }
   ensuredDbs.add(db);
 }
 
@@ -1187,29 +1201,275 @@ export function buildRobotsTxt(origin) {
     'User-agent: *',
     'Allow: /',
     'Allow: /guides',
+    'Allow: /insights',
+    'Allow: /insights/',
     'Allow: /service/',
     'Allow: /topic/',
+    'Allow: /llms.txt',
+    'Allow: /llms-full.txt',
     'Disallow: /admin',
     'Disallow: /admin/',
     'Disallow: /access',
     'Disallow: /access/',
     'Disallow: /api/',
+    '',
+    'User-agent: GPTBot',
+    'Allow: /',
+    '',
+    'User-agent: OAI-SearchBot',
+    'Allow: /',
+    '',
+    'User-agent: ChatGPT-User',
+    'Allow: /',
+    '',
+    'User-agent: ClaudeBot',
+    'Allow: /',
+    '',
+    'User-agent: PerplexityBot',
+    'Allow: /',
+    '',
+    'User-agent: Google-Extended',
+    'Allow: /',
+    '',
+    'User-agent: Pinterestbot',
+    'Allow: /',
+    '',
     `Sitemap: ${base}/sitemap.xml`,
     '',
   ].join('\n');
 }
 
-export function buildSitemapXml(origin) {
+export const SEO_INSIGHTS = [
+  {
+    id: 'preply-italki-profile-blueprint',
+    lang: 'ar',
+    category: 'profile',
+    categoryAr: 'تحسين البروفايل',
+    categoryEn: 'Profile Optimization',
+    title: 'كيف تكتب بروفايل مدرس احترافي على Preply و italki يجذب طلاباً من أوروبا وأمريكا والخليج',
+    summary: 'خطوات صياغة العنوان والنبذة بلغة يبحث بها الطلاب فعلياً مع تجنب الأخطاء التي تخفض ترتيبك في نتائج البحث.',
+    keywords: ['Preply tutor profile', 'italki teacher bio', 'تحسين بروفايل المدرس', 'تدريس أونلاين عالمي', 'Khutwa'],
+    ctaUrl: '/?service=profile_creation',
+    coverUrl: '',
+    pinHeight: 'tall',
+    palette: ['#132357', '#4e6bff'],
+    body: `المدرس الخبير قد يخسر نصف فرصه على Preply أو italki لأن أول سطرين في البروفايل يتحدثان عن الشهادات العامة بدل النتيجة التي يبحث عنها الطالب.\n\n1. معادلة العنوان الواضح:\nاجمع بين (التخصص الدقيق + نوع الطالب + المنهج أو الأسلوب). مثال: "Arabic & Quran Tutor for Beginners and Kids | Clear Step-by-Step Method".\n\n2. بنية النبذة المقنعة في 4 فقرات قصيرة:\n- خطّاف سريع يفهم هدف الطالب أو ولي الأمر.\n- خبرتك بالأرقام الواقعية دون وعود مبالغ فيها.\n- ماذا يحدث بالضبط داخل أول حصة.\n- دعوة هادئة لحجز حصة تجريبية.\n\n3. الكلمات المفتاحية داخل النص:\nاستخدم العبارات التي يكتبها المتعلم الأجنبي مثل: Conversational Arabic، Tajweed for beginners، GCSE Math، Business English.\n\nتريد مراجعة مجانية لبروفايلك الحالي؟ اطلب دراسة الحالة المجانية في خُطوة قبل أي تعديل.`,
+  },
+  {
+    id: 'tutor-intro-video-60s-script',
+    lang: 'en',
+    category: 'video',
+    categoryAr: 'الفيديو التعريفي',
+    categoryEn: 'Intro Video',
+    title: '60-Second Online Tutor Intro Video Script That Converts Trial Bookings Worldwide',
+    summary: 'Exact second-by-second structure, daylight home lighting setup, and clean caption tips for Preply, italki, and Superprof tutors.',
+    keywords: ['tutor intro video script', 'Preply video tips', 'online teacher video', 'Khutwa'],
+    ctaUrl: '/?service=video_creation&lang=en',
+    coverUrl: '',
+    pinHeight: 'medium',
+    palette: ['#1c1549', '#9d5cf4'],
+    body: `Learners often decide within 8 seconds whether to watch your full intro video or scroll to the next tutor.\n\nUse this proven 60-second structure:\n- 0:00–0:06 (The Hook): Speak directly to your learner's real goal. Skip slow "Hello my name is..." openings.\n- 0:06–0:30 (How You Teach): Show your method clearly—visual slides, conversation prompts, or structured exercises.\n- 0:30–0:45 (Relevant Proof): Mention years of teaching, learner ages/levels, and languages you speak.\n- 0:45–0:60 (Clear Invitation): Invite them warmly to book a trial session.\n\nTechnical essentials at home:\n- Face a daytime window for clean natural lighting.\n- Keep the camera at eye level and use a wired mic close to your collar.\n- Add concise on-screen captions because many international learners browse with muted audio.`,
+  },
+  {
+    id: 'quran-arabic-online-global-positioning',
+    lang: 'ar',
+    category: 'platforms',
+    categoryAr: 'القرآن والعربية عالمياً',
+    categoryEn: 'Quran & Arabic Global',
+    title: 'دليل مدرس القرآن والعربية: كيف تصل لطلاب أوروبا وأمريكا وأستراليا بطريقة مهنية',
+    summary: 'مقارنة واقعية بين المنصات المفتوحة والأكاديميات وبناء حضور مباشر يحترم خصوصية المتعلمين وأولياء الأمور.',
+    keywords: ['تعليم القرآن أونلاين', 'تدريس العربية لغير الناطقين', 'Quran tutor online', 'Arabic tutor worldwide', 'خُطوة'],
+    ctaUrl: '/?service=market_review',
+    coverUrl: '',
+    pinHeight: 'tall',
+    palette: ['#0a2a33', '#159c8b'],
+    body: `تعليم القرآن الكريم والتجويد واللغة العربية لغير الناطقين بها من أكثر المجالات المطلوبة عالمياً في أمريكا وكندا وبريطانيا وألمانيا وأستراليا، لكن كثيراً من المدرسين يعتمدون على نفس الصياغة التقليدية.\n\nكيف تميز حضورك؟\n1. حدد الفئة بوضوح: أطفال الجاليات، الكبار المبتدئون (من الصفر / النورانية)، أم تصحيح التلاوة والإجازة.\n2. طمئن ولي الأمر: وضّح أسلوب التفاعل مع الأطفال، الصبر، واستخدام لوحة بيضاء مرئية وأنشطة قصيرة.\n3. جهّز نبذة باللغتين العربية والإنجليزية: لأن معظم من يحجز للأطفال في الخارج يبحث باللغة الإنجليزية عن "Quran & Tajweed Teacher for Kids".\n4. لا تضع كل اعتمادك على منصة واحدة: ابنِ بروفايلاً قوياً على TeacherOn أو Superprof مع بورتفوليو فيديو منظم وروابط تواصل احترافية.`,
+  },
+  {
+    id: 'ai-training-tutor-outlier-guide',
+    lang: 'en',
+    category: 'ai_roles',
+    categoryAr: 'أدوار تقييم الذكاء الاصطناعي',
+    categoryEn: 'AI Tutor Roles',
+    title: 'How Bilingual Teachers & Academics Qualify for Remote AI Tutor Roles (Outlier & DataAnnotation)',
+    summary: 'Key English proficiency, rubric accuracy, and CV positioning checkpoints before applying to AI model evaluation platforms.',
+    keywords: ['AI tutor remote jobs', 'Outlier tutor tips', 'DataAnnotation bilingual educator', 'Khutwa'],
+    ctaUrl: '/?service=profile_creation&lang=en',
+    coverUrl: '',
+    pinHeight: 'medium',
+    palette: ['#181f47', '#3574f2'],
+    body: `Qualified teachers, linguists, and STEM specialists are increasingly working remotely evaluating and refining AI model responses.\n\nWhat platforms look for:\n1. Clean English writing & rubric reading (typically B2–C1+): Always follow step-by-step instructions literally rather than guessing.\n2. Subject specialization: Mathematics, Coding, Physics, Chemistry, Arabic-English bilingual nuance, and pedagogy.\n3. Concise, structured CV/LinkedIn summary highlighting analytical writing, grading rubrics, and fact-checking experience.\n\nNote: Khutwa prepares your professional profile, CV framing, and positioning cleanly—without fake credentials or any guaranteed acceptance claims.`,
+  },
+  {
+    id: 'trial-lesson-conversion-blueprint',
+    lang: 'ar',
+    category: 'teaching',
+    categoryAr: 'الحصة التجريبية',
+    categoryEn: 'Trial Lessons',
+    title: 'أول 5 دقائق في الحصة التجريبية: كيف تحوّل الطالب من زائر إلى اشتراك شهري منتظم',
+    summary: 'هيكل عملي للحصة التجريبية أونلاين يجمع بين الاستماع، تشخيص المستوى، تقديم قيمة فورية، وخطة الـ 4 أسابيع.',
+    keywords: ['الحصة التجريبية', 'إدارة الدرس أونلاين', 'احتفاظ بالطلاب', 'online trial lesson structure'],
+    ctaUrl: '/?topic=topic_trial_opening',
+    coverUrl: '',
+    pinHeight: 'medium',
+    palette: ['#241744', '#7e5bef'],
+    body: `كثير من المدرسين يخسرون الطالب بعد الحصة التجريبية لأنهم يحوّلونها إلى امتحان ممل أو محاضرة طويلة بلا خطة واضحة.\n\nاتبع هذا التقسيم البسيط في 30 دقيقة:\n- الدقائق 1–5 (الاستماع): اسأل الطالب عن هدفه المحدد ومتى يحتاج تحقيقه.\n- الدقائق 6–12 (تشخيص سريع غير مرهق): 3 مهام متدرجة (سهل، متوسط، تطبيقي) تكشف مستواه الفعلي.\n- الدقائق 13–24 (شرح عملي مركّز): علّمه مهارة أو قاعدة واحدة صغيرة يطبقها بنفسه فوراً فيشعر بالإنجاز.\n- الدقائق 25–30 (خريطة الطريق): لخّص ما أنجزه اليوم واعرض خطة الحصص الأربع القادمة بهدوء ووضوح.`,
+  },
+  {
+    id: 'pinterest-linkedin-global-tutor-leads',
+    lang: 'ar',
+    category: 'marketing',
+    categoryAr: 'التسويق العالمي',
+    categoryEn: 'Global Visibility',
+    title: 'كيف تبني مصادر طلاب عالميين عبر Google و Pinterest و LinkedIn دون ملاحقة العملاء يدوياً',
+    summary: 'لماذا تجلب المقالات الغنية بالكلمات المفتاحية وبوسترات Pinterest المنظمة عملاء يبحثون عنك على مدار الساعة.',
+    keywords: ['تسويق للمدرسين أونلاين', 'Pinterest for tutors', 'LinkedIn teacher brand', 'SEO للمدرسين', 'خُطوة'],
+    ctaUrl: '/?service=campaign_review',
+    coverUrl: '',
+    pinHeight: 'tall',
+    palette: ['#102542', '#3d7eff'],
+    body: `الاعتماد على البحث اليدوي عن العملاء يستهلك وقتك وطاقتك كل يوم. البديل المستدام هو بناء أصول رقمية تعمل لصالحك:\n\n1. بوسترات تعليمية على Pinterest (2:3): كل بوستر يلخص فكرة أو قاعدة في تخصصك ويربط مباشرة بصفحة مقالة أو دراسة حالة.\n2. مقالات واضحة موجهة لأسئلة الطلاب والمعلمين: عندما تجيب على أسئلة حقيقية بلغة بسيطة ومنظمة (Schema + FAQ)، تبدأ محركات البحث ونماذج الذكاء الاصطناعي باقتراح صفحاتك كمصدر موثوق.\n3. حضور مهني على LinkedIn: حوّل نبذتك إلى عرض لحل مشكلة محددة (مثل Arabic for Diplomats & Medical Staff أو IGCSE Physics Coaching) بدلاً من مجرد سيرة ذاتية قديمة.\n4. تتبع كل رابط بـ UTM: لتعرف أي منصة وأي محتوى يجلب استفسارات حقيقية.`,
+  },
+  {
+    id: 'tutor-search-keywords-seo',
+    lang: 'en',
+    category: 'profile',
+    categoryAr: 'كلمات البحث',
+    categoryEn: 'Search Keywords',
+    title: 'Tutor Profile SEO: The Exact Keywords International Students Search When Booking Lessons',
+    summary: 'Stop writing "passionate experienced teacher". Learn how learners filter tutors by exam, age group, schedule, and outcome.',
+    keywords: ['tutor SEO', 'online teacher keywords', 'get more students on Preply', 'Khutwa'],
+    ctaUrl: '/?topic=topic_search_terms&lang=en',
+    coverUrl: '',
+    pinHeight: 'medium',
+    palette: ['#0f2b38', '#22b8a6'],
+    body: `Students rarely search for "dedicated teacher with 10 years experience". They search for specific goals:\n\n- Exam & Curriculum Terms: IELTS Speaking Band 7+, GCSE Maths Higher, AP Calculus, SAT Prep, IGCSE Chemistry.\n- Audience & Goal Terms: Arabic for Beginners, Tajweed for Kids, Business English for Engineers, German A1-B1.\n- Practical Trust Signals: Structured PDF notes after class, flexible weekend slots, patient step-by-step practice.\n\nAction step: Audit your headline, first 180 characters of your bio, and lesson titles so those exact terms appear naturally—without keyword stuffing.`,
+  },
+  {
+    id: 'free-case-study-before-paying',
+    lang: 'ar',
+    category: 'profile',
+    categoryAr: 'دراسة الحالة المجانية',
+    categoryEn: 'Free Audit',
+    title: 'لماذا تقدم خُطوة دراسة حالة مجانية قبل أن تدفع دولاراً واحداً؟',
+    summary: 'تعرف على ما نفحصه في بروفايلك الحالي والفيديو والمنصة الأنسب لتخصصك بمراجعة بشرية صادقة بدون أي التزام.',
+    keywords: ['دراسة حالة مجانية للمدرس', 'مراجعة بروفايل مجانية', 'Khutwa free case study', 'خُطوة'],
+    ctaUrl: '/?service=market_review',
+    coverUrl: '',
+    pinHeight: 'medium',
+    palette: ['#1d1c4a', '#c99738'],
+    body: `كثير من المدرسين لا يحتاجون إلى دفع مقابل خدمات كثيرة؛ أحياناً يحتاجون فقط إلى تشخيص صادق يوضح: هل المشكلة في المنصة نفسها؟ أم في أول 5 ثوانٍ من الفيديو؟ أم في التسعير والتموضع؟\n\nلذلك تبدأ خُطوة معك بدراسة حالة مجانية تماماً تشمل:\n1. قراءة تخصصك وسنوات خبرتك وهدفك المالي أو المهني.\n2. تحديد نقاط القوة والفجوات الحالية في عرضك المهني.\n3. ترشيح أنسب 2–3 منصات أو مسارات لتخصصك ومستوى لغتك.\n4. خطوات أولوية واضحة—وتقرر بعدها بحرية تامة دون أي ضغط أو كلمات مرور.`,
+  },
+];
+
+function formatPostForInsights(row) {
+  let keywords = [];
+  if (Array.isArray(row.keywords)) keywords = row.keywords;
+  else if (typeof row.keywords === 'string') {
+    keywords = row.keywords.split(/[،,]/).map(s => s.trim()).filter(Boolean);
+  }
+  const cat = clean(row.category, 40) || 'marketing';
+  const catNames = {
+    profile: ['تحسين البروفايل', 'Profile Optimization'],
+    video: ['الفيديو التعريفي', 'Intro Video'],
+    platforms: ['اختيار المنصات', 'Platforms'],
+    teaching: ['مهارات التدريس', 'Teaching Craft'],
+    ai_roles: ['فرص الذكاء الاصطناعي', 'AI Tutor Roles'],
+    marketing: ['التسويق العالمي', 'Global Marketing'],
+  };
+  const pair = catNames[cat] || ['مقالة وأفكار', 'Insights & Pins'];
+  const lang = row.lang === 'en' ? 'en' : 'ar';
+  const summary = clean(row.summary, 280) || String(row.body || '').replace(/\s+/g, ' ').slice(0, 155) + '…';
+  return {
+    id: row.id,
+    lang,
+    category: cat,
+    categoryAr: pair[0],
+    categoryEn: pair[1],
+    title: row.title,
+    summary,
+    keywords: keywords.length ? keywords : ['Khutwa', 'خُطوة', 'Online Tutoring'],
+    ctaUrl: row.cta_url || '/?service=market_review',
+    coverUrl: clean(row.cover_url, 800),
+    pinHeight: 'medium',
+    palette: ['#132357', '#6c5ce7'],
+    body: row.body,
+    createdAt: row.created_at || '',
+    isDynamic: true,
+  };
+}
+
+async function getPublishedInsights(env) {
+  let dynamicPosts = [];
+  if (env?.DB) {
+    try {
+      await ensurePhase2Schema(env.DB);
+      const res = await env.DB.prepare("SELECT * FROM marketing_posts WHERE status = 'published' ORDER BY updated_at DESC LIMIT 80").all();
+      dynamicPosts = (res.results || []).map(formatPostForInsights);
+    } catch { /* ignore when static */ }
+  }
+  return [...dynamicPosts, ...SEO_INSIGHTS];
+}
+
+export function buildSitemapXml(origin, dynamicPosts = []) {
   const base = String(origin || 'https://khotwa.khotwatutors.workers.dev').replace(/\/+$/, '');
   const now = new Date().toISOString().slice(0, 10);
+  const dynamicEntries = (Array.isArray(dynamicPosts) ? dynamicPosts : []).map(p => ({
+    loc: `${base}/insights/${encodeURIComponent(p.id)}`,
+    priority: '0.85',
+    freq: 'weekly',
+  }));
   const urls = [
     { loc: `${base}/`, priority: '1.0', freq: 'weekly' },
+    { loc: `${base}/insights`, priority: '0.95', freq: 'daily' },
     { loc: `${base}/guides`, priority: '0.9', freq: 'weekly' },
+    { loc: `${base}/llms.txt`, priority: '0.7', freq: 'weekly' },
+    ...SEO_INSIGHTS.map(p => ({ loc: `${base}/insights/${encodeURIComponent(p.id)}`, priority: '0.85', freq: 'monthly' })),
+    ...dynamicEntries,
     ...SEO_SERVICES.map(s => ({ loc: `${base}/service/${encodeURIComponent(s.id)}`, priority: '0.85', freq: 'monthly' })),
     ...SEO_TOPICS.map(t => ({ loc: `${base}/topic/${encodeURIComponent(t.id)}`, priority: '0.75', freq: 'monthly' })),
   ];
   const entries = urls.map(u => `  <url>\n    <loc>${escapeXml(u.loc)}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>`;
+}
+
+export function buildLlmsTxt(origin, pricing, insights = SEO_INSIGHTS) {
+  const base = String(origin || 'https://khotwa.khotwatutors.workers.dev').replace(/\/+$/, '');
+  const svcLines = SEO_SERVICES.map(s => {
+    const p = pricing?.services?.[s.priceKey]?.active;
+    const priceLabel = p === 0 ? 'Free ($0)' : p == null ? 'Custom Quote' : `$${p} USD`;
+    return `- [${s.titleEn} (${s.titleAr})](${base}/service/${s.id}) — ${priceLabel}: ${s.summaryEn}`;
+  }).join('\n');
+  const insightLines = (insights || []).slice(0, 30).map(p => `- [${p.title}](${base}/insights/${p.id}): ${p.summary}`).join('\n');
+  return `# Khutwa (خُطوة) — Tutor Growth, Profile & Video Studio
+
+> Khutwa helps online tutors, Quran & Arabic teachers, academic coaches, and bilingual educators worldwide build credible tutor profiles (Preply, italki, Verbling, Superprof, TeacherOn, LinkedIn), record high-converting 60-second intro videos, structure online lessons, and evaluate remote AI-tutor opportunities. Founded by Abdullah Essam (khotwatutors@gmail.com). Zero password sharing, zero fake income guarantees, and every educator can start with a 100% free human case study.
+
+## Key Public URLs
+- [Khutwa Official Platform](${base}/): Bilingual (Arabic & English) service catalog, Market Match explorer, interactive Khutwa Guide, and unified request form.
+- [Khutwa Insights & Visual Pins Board](${base}/insights): Pinterest-style educational articles, tutor growth checklists, keyword guides, and actionable tips.
+- [Services & Teaching Library Directory](${base}/guides): Complete index of tutor growth services and 36 practical teaching & positioning topics.
+- [Full Context for AI Assistants](${base}/llms-full.txt): Detailed Markdown reference of services, pricing, policies, and guides.
+
+## Services & Transparent Pricing
+${svcLines}
+
+## Featured Insights & Tutor Guides
+${insightLines}
+
+## Trust & Safety Policy
+- Khutwa never asks for platform passwords or login tokens.
+- Khutwa never sells fake reviews or promises guaranteed platform acceptance or guaranteed income.
+- Free Case Study ($0) is reviewed manually before any paid commitment.
+`;
+}
+
+export function buildLlmsFullTxt(origin, pricing, insights = SEO_INSIGHTS) {
+  const base = String(origin || 'https://khotwa.khotwatutors.workers.dev').replace(/\/+$/, '');
+  const baseTxt = buildLlmsTxt(origin, pricing, insights);
+  const topicLines = SEO_TOPICS.map(t => `- [${t.titleEn} | ${t.titleAr}](${base}/topic/${t.id}): ${t.freePreviewAr}`).join('\n');
+  const fullArticles = (insights || []).slice(0, 20).map(p => `### ${p.title}\nURL: ${base}/insights/${p.id}\nKeywords: ${(p.keywords || []).join(', ')}\n\n${p.body}`).join('\n\n---\n\n');
+  return `${baseTxt}\n## Micro-Learning Library Topics ($${pricing?.topicPrice ?? 3} launch)\n${topicLines}\n\n## Full Published Articles & Guides\n${fullArticles}\n`;
 }
 
 function seoShellStyles() {
@@ -1425,6 +1685,237 @@ ${seoShellStyles()}
   </div>
 
   <footer class="foot"><span>© 2026 Khutwa · Tutor Growth &amp; Support</span><a href="${escapeHtml(deepCta)}">${isEn ? 'Go to Request Form' : 'انتقل لنموذج الطلب الموحد'}</a></footer>
+</div>
+</body>
+</html>`;
+}
+
+export function renderInsightsIndexHtml({ posts = SEO_INSIGHTS, origin, lang = 'ar', activeCategory = 'all', query = '' }) {
+  const isEn = lang === 'en';
+  const base = String(origin || 'https://khotwa.khotwatutors.workers.dev').replace(/\/+$/, '');
+  const title = isEn ? 'Khutwa Insights & Visual Pins — Global Tutor Growth Articles' : 'لوحة المقالات والأفكار | خُطوة للمدرسين عالمياً';
+  const desc = isEn
+    ? 'Pinterest-style visual guides, tutor profile SEO tips, intro video scripts, and global online teaching strategies by Khutwa.'
+    : 'مقالات تعليمية وأفكار بصرية بنظام اللوحات، كلمات مفتاحية، وأدلة عملية لتطوير بروفايل المدرس والوصول لطلاب عالميين عبر جوجل والمنصات.';
+
+  const cats = [
+    { id: 'all', ar: 'الكل', en: 'All' },
+    { id: 'profile', ar: 'تحسين البروفايل', en: 'Profiles' },
+    { id: 'video', ar: 'الفيديو التعريفي', en: 'Intro Video' },
+    { id: 'platforms', ar: 'المنصات والقرآن', en: 'Platforms' },
+    { id: 'teaching', ar: 'مهارات التدريس', en: 'Teaching' },
+    { id: 'ai_roles', ar: 'تقييم الذكاء الاصطناعي', en: 'AI Roles' },
+    { id: 'marketing', ar: 'التسويق العالمي', en: 'Global Marketing' },
+  ];
+
+  const qLower = String(query || '').trim().toLowerCase();
+  const filtered = (posts || []).filter(p => {
+    if (activeCategory !== 'all' && p.category !== activeCategory) return false;
+    if (!qLower) return true;
+    const hay = `${p.title} ${p.summary} ${(p.keywords || []).join(' ')} ${p.categoryAr} ${p.categoryEn}`.toLowerCase();
+    return hay.includes(qLower);
+  });
+
+  const jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description: desc,
+    url: `${base}/insights`,
+    isPartOf: { '@type': 'WebSite', name: 'خُطوة | Khutwa', url: `${base}/` },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: filtered.slice(0, 20).map((p, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        url: `${base}/insights/${encodeURIComponent(p.id)}`,
+        name: p.title,
+      })),
+    },
+  }).replace(/</g, '\\u003c');
+
+  const cardsHtml = filtered.length
+    ? filtered.map(p => {
+        const pal = p.palette || ['#132357', '#5577ff'];
+        const postUrl = `/insights/${encodeURIComponent(p.id)}?lang=${isEn ? 'en' : 'ar'}`;
+        const cover = p.coverUrl
+          ? `<img class="pin-img" src="${escapeHtml(p.coverUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`
+          : `<div class="pin-cover ${p.pinHeight === 'tall' ? 'tall' : ''}" style="background:linear-gradient(145deg,${pal[0]},${pal[1]})"><span class="pin-lang">${p.lang === 'en' ? 'EN' : 'AR'}</span><strong>${escapeHtml(isEn ? p.categoryEn : p.categoryAr)}</strong><h3>${escapeHtml(p.title)}</h3><small>khotwa.khotwatutors.workers.dev</small></div>`;
+        const tags = (p.keywords || []).slice(0, 4).map(k => `<span class="kw">#${escapeHtml(k)}</span>`).join('');
+        return `<article class="pin-card"><a class="pin-link" href="${escapeHtml(postUrl)}">${cover}<div class="pin-body"><div class="pin-meta"><span>${escapeHtml(isEn ? p.categoryEn : p.categoryAr)}</span><span>${p.isDynamic ? (isEn ? 'Published Pin' : 'منشور مضاف') : (isEn ? 'Evergreen Guide' : 'دليل مرجعي')}</span></div><h4>${escapeHtml(p.title)}</h4><p>${escapeHtml(p.summary)}</p><div class="kw-row">${tags}</div></div></a></article>`;
+      }).join('')
+    : `<div class="card" style="grid-column:1/-1;text-align:center"><p>${isEn ? 'No articles match this filter yet.' : 'لا توجد مقالات مطابقة لهذا البحث حالياً.'}</p><a class="btn btn-primary" href="/insights">${isEn ? 'Reset Filters' : 'عرض كل المقالات'}</a></div>`;
+
+  const catLinks = cats.map(c => `<a class="pill-tab ${activeCategory === c.id ? 'active' : ''}" href="/insights?cat=${encodeURIComponent(c.id)}&lang=${isEn ? 'en' : 'ar'}${qLower ? '&q=' + encodeURIComponent(query) : ''}">${escapeHtml(isEn ? c.en : c.ar)}</a>`).join('');
+
+  return `<!doctype html>
+<html lang="${isEn ? 'en' : 'ar'}" dir="${isEn ? 'ltr' : 'rtl'}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<meta name="description" content="${escapeHtml(desc)}">
+<link rel="canonical" href="${escapeHtml(base)}/insights">
+<link rel="alternate" type="text/plain" title="LLMs Context" href="${escapeHtml(base)}/llms.txt">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(desc)}">
+<meta property="og:url" content="${escapeHtml(base)}/insights">
+<meta property="og:image" content="${escapeHtml(base)}/assets/khutwa-brand-banner.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">${jsonLd}</script>
+${seoShellStyles()}
+<style>
+.masonry{column-count:3;column-gap:16px;margin-top:18px}
+@media(max-width:960px){.masonry{column-count:2}}
+@media(max-width:620px){.masonry{column-count:1}}
+.pin-card{break-inside:avoid;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .2s,border-color .2s}
+.pin-card:hover{transform:translateY(-3px);border-color:rgba(159,241,223,.48)}
+.pin-link{display:block}
+.pin-img{width:100%;max-height:360px;object-fit:cover;display:block}
+.pin-cover{padding:22px 20px;min-height:170px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;position:relative;color:#fff}
+.pin-cover.tall{min-height:225px}
+.pin-cover strong{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#d6e4ff;opacity:.92}
+.pin-cover h3{margin:0;font-size:18px;line-height:1.42}
+.pin-cover small{font-size:11px;opacity:.75;font-family:monospace}
+.pin-lang{position:absolute;top:14px;inset-inline-end:14px;background:rgba(8,12,32,.65);border:1px solid rgba(255,255,255,.22);border-radius:7px;padding:2px 8px;font-size:10px;font-weight:800}
+.pin-body{padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.pin-meta{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--mint);font-weight:700}
+.pin-body h4{margin:0;font-size:15px;line-height:1.45}
+.pin-body p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.7}
+.kw-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.kw{font-size:10.5px;color:#cbd7ff;background:rgba(255,255,255,.06);border:1px solid rgba(188,198,255,.15);padding:2px 8px;border-radius:6px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+.pills{display:flex;flex-wrap:wrap;gap:7px}
+.pill-tab{padding:7px 12px;border-radius:9px;border:1px solid var(--line);font-size:12px;font-weight:700;color:#cbd7ff;background:rgba(255,255,255,.03)}
+.pill-tab.active{background:linear-gradient(120deg,#4769ff,#9d5cf4);border-color:transparent;color:#fff}
+.search-box{display:flex;gap:8px;flex:1;max-width:360px}
+.search-box input{flex:1;min-width:140px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#0c1330;color:#fff;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/?lang=${isEn ? 'en' : 'ar'}">خُطوة <small>KHUTWA · GLOBAL TUTOR INSIGHTS</small></a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="/guides?lang=${isEn ? 'en' : 'ar'}">${isEn ? 'Services & Guides' : 'دليل الخدمات'}</a>
+      <a class="btn" href="/insights?lang=${isEn ? 'ar' : 'en'}">${isEn ? 'العربية' : 'EN'}</a>
+      <a class="btn btn-primary" href="/?service=market_review&lang=${isEn ? 'en' : 'ar'}">${isEn ? 'Free Case Study' : 'دراسة حالة مجانية'}</a>
+    </div>
+  </header>
+  <main style="padding-top:20px">
+    <div class="hero-box">
+      <span class="kicker">KHUTWA PINS &amp; ARTICLES · SEO + AI DISCOVERY</span>
+      <h1>${escapeHtml(title)}</h1>
+      <p class="lead">${escapeHtml(desc)}</p>
+      <div class="toolbar">
+        <div class="pills">${catLinks}</div>
+        <form class="search-box" method="GET" action="/insights">
+          <input type="hidden" name="cat" value="${escapeHtml(activeCategory)}">
+          <input type="hidden" name="lang" value="${isEn ? 'en' : 'ar'}">
+          <input type="search" name="q" value="${escapeHtml(query)}" placeholder="${isEn ? 'Search topic or keyword...' : 'ابحث بكلمة مفتاحية (Preply، فيديو، قرآن)...'}">
+          <button class="btn" type="submit">${isEn ? 'Search' : 'بحث'}</button>
+        </form>
+      </div>
+    </div>
+    <div class="masonry">${cardsHtml}</div>
+  </main>
+  <footer class="foot"><span>© 2026 Khutwa · Global Tutor Growth</span><div style="display:flex;gap:14px"><a href="/llms.txt">AI Index (llms.txt)</a><a href="/sitemap.xml">Sitemap</a><a href="/">${isEn ? 'Back to Home' : 'الرئيسية'}</a></div></footer>
+</div>
+</body>
+</html>`;
+}
+
+export function renderInsightDetailHtml({ post, origin, lang = 'ar' }) {
+  const isEn = lang === 'en' || post.lang === 'en';
+  const base = String(origin || 'https://khotwa.khotwatutors.workers.dev').replace(/\/+$/, '');
+  const pageUrl = `${base}/insights/${encodeURIComponent(post.id)}`;
+  const pal = post.palette || ['#132357', '#5577ff'];
+  const ogImg = post.coverUrl || `${base}/assets/khutwa-brand-banner.jpg`;
+  const jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: post.title,
+        description: post.summary,
+        keywords: (post.keywords || []).join(', '),
+        inLanguage: post.lang === 'en' ? 'en' : 'ar',
+        image: ogImg,
+        mainEntityOfPage: pageUrl,
+        author: { '@type': 'Organization', name: 'خُطوة | Khutwa', url: `${base}/` },
+        publisher: { '@type': 'Organization', name: 'خُطوة | Khutwa', url: `${base}/` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Khutwa', item: `${base}/` },
+          { '@type': 'ListItem', position: 2, name: isEn ? 'Insights' : 'المقالات والأفكار', item: `${base}/insights` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: pageUrl },
+        ],
+      },
+    ],
+  }).replace(/</g, '\\u003c');
+
+  const paragraphs = String(post.body || '').split(/\n{2,}/).map(p => p.trim()).filter(Boolean).map(p => `<p style="white-space:pre-line;margin:0 0 16px;color:#e3ebff;font-size:15px">${escapeHtml(p)}</p>`).join('');
+  const ctaHref = post.ctaUrl || '/?service=market_review';
+  const waText = encodeURIComponent(`مرحبًا خُطوة، قرأت مقالة: ${post.title}`);
+
+  return `<!doctype html>
+<html lang="${post.lang === 'en' ? 'en' : 'ar'}" dir="${post.lang === 'en' ? 'ltr' : 'rtl'}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(post.title)} | خُطوة Khutwa</title>
+<meta name="description" content="${escapeHtml(post.summary)}">
+<meta name="keywords" content="${escapeHtml((post.keywords || []).join(', '))}">
+<link rel="canonical" href="${escapeHtml(pageUrl)}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="خُطوة | Khutwa">
+<meta property="og:title" content="${escapeHtml(post.title)}">
+<meta property="og:description" content="${escapeHtml(post.summary)}">
+<meta property="og:url" content="${escapeHtml(pageUrl)}">
+<meta property="og:image" content="${escapeHtml(ogImg)}">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">${jsonLd}</script>
+${seoShellStyles()}
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">خُطوة <small>KHUTWA · TUTOR GROWTH & SUPPORT</small></a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="/insights">${isEn ? 'All Insights' : 'كل المقالات والأفكار'}</a>
+      <a class="btn btn-primary" href="${escapeHtml(ctaHref)}">${isEn ? 'Take Action in Khutwa ↗' : 'اطلب خدمتك أو دراسة الحالة ↗'}</a>
+    </div>
+  </header>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="/">${isEn ? 'Home' : 'الرئيسية'}</a> /
+    <a href="/insights">${isEn ? 'Insights & Pins' : 'المقالات والأفكار'}</a> /
+    <span>${escapeHtml(isEn ? post.categoryEn : post.categoryAr)}</span>
+  </nav>
+  <article class="hero-box" style="background:linear-gradient(155deg,${pal[0]},rgba(16,26,57,.96))">
+    <span class="kicker">${escapeHtml(isEn ? post.categoryEn : post.categoryAr)} · KHUTWA INSIGHT</span>
+    <h1>${escapeHtml(post.title)}</h1>
+    <p class="lead">${escapeHtml(post.summary)}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+      ${(post.keywords || []).map(k => `<span style="font-size:11px;padding:3px 9px;border-radius:7px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16)">#${escapeHtml(k)}</span>`).join('')}
+    </div>
+  </article>
+  <div class="grid">
+    <section class="card">
+      ${post.coverUrl ? `<img src="${escapeHtml(post.coverUrl)}" alt="${escapeHtml(post.title)}" style="width:100%;max-height:420px;object-fit:cover;border-radius:14px;margin-bottom:16px">` : ''}
+      ${paragraphs}
+    </section>
+    <aside class="card">
+      <h2>${isEn ? 'Apply This With Khutwa' : 'طبّق هذه الخطوة مع خُطوة'}</h2>
+      <p style="font-size:13.5px;color:#ced7f2;margin:0 0 16px">${isEn ? 'Start with a 100% free human case study or choose the exact profile/video service that fits your goal.' : 'ابدأ بدراسة حالة مجانية 100% لتشخيص بروفايلك ومنصتك الأنسب قبل أي التزام مالي.'}</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a class="btn btn-primary" href="${escapeHtml(ctaHref)}">${isEn ? 'Open Khutwa Request ↗' : 'اطلب الخدمة / دراسة الحالة المجانية ↗'}</a>
+        <a class="btn" href="/guides">${isEn ? 'Browse All Services & Topics' : 'تصفح كل الخدمات والموضوعات'}</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://wa.me/201557898203?text=${waText}">${isEn ? 'Ask Abdullah on WhatsApp' : 'اسأل عبر واتساب'}</a>
+      </div>
+    </aside>
+  </div>
+  <footer class="foot"><span>© 2026 Khutwa · Better Profiles. Bigger Opportunities.</span><a href="/insights">${isEn ? '← Back to Insights Board' : '← العودة إلى لوحة المقالات'}</a></footer>
 </div>
 </body>
 </html>`;
@@ -2161,13 +2652,19 @@ async function adminRoute(request, env) {
     if (!title || !bodyTxt) return json({ ok: false, error: 'Title and post content are required.' }, 400);
     const platform = clean(body.platform, 40) || 'linkedin';
     const status = ['draft', 'ready', 'published'].includes(body.status) ? body.status : 'draft';
+    const category = clean(body.category, 40) || 'marketing';
+    const keywords = clean(body.keywords, 300) || '';
+    const summary = clean(body.summary, 280) || bodyTxt.replace(/\s+/g, ' ').slice(0, 155);
+    const coverUrl = clean(body.coverUrl, 800) || '';
+    const lang = body.lang === 'en' ? 'en' : 'ar';
     const now = new Date().toISOString();
-    await env.DB.prepare(`INSERT INTO marketing_posts (id, target_key, platform, angle, title, body, cta_url, status, scheduled_date, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    await env.DB.prepare(`INSERT INTO marketing_posts (id, target_key, platform, angle, category, keywords, summary, cover_url, lang, title, body, cta_url, status, scheduled_date, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET target_key=excluded.target_key, platform=excluded.platform, angle=excluded.angle,
+      category=excluded.category, keywords=excluded.keywords, summary=excluded.summary, cover_url=excluded.cover_url, lang=excluded.lang,
       title=excluded.title, body=excluded.body, cta_url=excluded.cta_url, status=excluded.status, scheduled_date=excluded.scheduled_date, updated_at=excluded.updated_at`)
-      .bind(id, clean(body.targetKey, 80) || null, platform, clean(body.angle, 60) || null, title, bodyTxt, clean(body.ctaUrl, 600) || null, status, clean(body.scheduledDate, 30) || null, now, now).run();
-    return json({ ok: true, id });
+      .bind(id, clean(body.targetKey, 80) || null, platform, clean(body.angle, 60) || null, category, keywords, summary, coverUrl, lang, title, bodyTxt, clean(body.ctaUrl, 600) || null, status, clean(body.scheduledDate, 30) || null, now, now).run();
+    return json({ ok: true, id, publicUrl: status === 'published' ? `${url.origin}/insights/${encodeURIComponent(id)}` : null });
   }
   const mktPatchDel = path.match(/^\/api\/admin\/marketing-posts\/([A-Za-z0-9_-]+)$/);
   if (mktPatchDel && request.method === 'PATCH') {
@@ -2328,8 +2825,43 @@ export default {
     if (url.pathname === '/robots.txt') {
       return new Response(buildRobotsTxt(origin), { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
     }
+    if (url.pathname === '/llms.txt' || url.pathname === '/llms-full.txt') {
+      const settings = env.DB ? await getRuntimeSettings(env.DB) : mergeSettings({});
+      const pricing = resolveCatalogPricing(settings);
+      const insights = await getPublishedInsights(env);
+      const bodyTxt = url.pathname === '/llms-full.txt'
+        ? buildLlmsFullTxt(origin, pricing, insights)
+        : buildLlmsTxt(origin, pricing, insights);
+      return new Response(bodyTxt, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=1800' } });
+    }
     if (url.pathname === '/sitemap.xml') {
-      return new Response(buildSitemapXml(origin), { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+      let dynamicPosts = [];
+      if (env.DB) {
+        try {
+          await ensurePhase2Schema(env.DB);
+          const res = await env.DB.prepare("SELECT id FROM marketing_posts WHERE status = 'published' ORDER BY updated_at DESC LIMIT 80").all();
+          dynamicPosts = res.results || [];
+        } catch {}
+      }
+      return new Response(buildSitemapXml(origin, dynamicPosts), { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=1800' } });
+    }
+    if (url.pathname === '/insights' || url.pathname === '/insights/') {
+      const insights = await getPublishedInsights(env);
+      const activeCategory = clean(url.searchParams.get('cat'), 40) || 'all';
+      const query = clean(url.searchParams.get('q'), 120) || '';
+      return new Response(renderInsightsIndexHtml({ posts: insights, origin, lang, activeCategory, query }), {
+        headers: { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff', 'cache-control': 'public, max-age=300' },
+      });
+    }
+    const insMatch = url.pathname.match(/^\/insights\/([A-Za-z0-9_-]+)\/?$/);
+    if (insMatch) {
+      const insights = await getPublishedInsights(env);
+      const post = insights.find(p => p.id === insMatch[1]);
+      if (post) {
+        return new Response(renderInsightDetailHtml({ post, origin, lang }), {
+          headers: { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff', 'cache-control': 'public, max-age=600' },
+        });
+      }
     }
     if (url.pathname === '/guides' || url.pathname === '/guides/') {
       const settings = env.DB ? await getRuntimeSettings(env.DB) : mergeSettings({});
@@ -2367,4 +2899,3 @@ export default {
   },
 };
 
-.
